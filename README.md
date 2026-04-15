@@ -1,18 +1,23 @@
-# SignMatic ASL Real-Time Recognition
+# SignMatic: Real-Time ASL Recognition System (MediaPipe + LSTM)
 
-A real-time sign recognition system for embedded deployment, aimed at converting signed gestures into on-screen text and speech output.
+A real-time American Sign Language (ASL) recognition system that uses MediaPipe keypoints and an LSTM model to classify isolated signs and convert them into on-screen text (and later speech) for assistive communication.
 
-## Current goal
-Build a working prototype using webcam-based landmark detection and sequence classification, then deploy on Jetson.
+## Current Approach
+- MediaPipe Holistic for keypoint extraction (pose + hands)
+- Sequence-based LSTM model for temporal gesture recognition
+- Hybrid dataset:
+  - WLASL videos for base training
+  - Custom-recorded data for fine-tuning
+- Real-time inference with:
+  - Idle class (no sign detection)
+  - Hand presence gating
+  - Confidence thresholding
+  - Prediction cooldown
 
-## Project structure
-- `notebooks/` experiments and tutorials
-- `src/` main code
-- `data/` collected sequences
-- `models/` trained models
-- `outputs/` results and demo outputs
-- `docs/` thesis-related images or notes
+## Goal
+Deploy a stable, real-time ASL recognition system on an embedded platform (Jetson) that outputs text and speech for a constrained vocabulary (15–30 words).
 
 ## Acknowledgment
-This project is partially based on a public tutorial for action detection using MediaPipe and LSTM.
-The tutorial has been adapted and extended for real-time ASL recognition and embedded deployment.
+
+This project was initially inspired by a public tutorial on action detection using MediaPipe and LSTM.
+The implementation has been significantly extended and modified to support a full real-time ASL recognition pipeline, including custom dataset creation, WLASL-based training, and embedded deployment.

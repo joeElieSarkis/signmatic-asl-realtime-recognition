@@ -9,16 +9,12 @@ OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'MSASL', 'processed_msasl')
 os.makedirs(OUT_DIR, exist_ok=True)
 
 TARGET_LABELS = [
-    'Hello',
+    'Nice',
+    'Eat',
     'Yes',
     'No',
-    'Help',
     'Water',
-    'Eat',
-    'Fine',
-    'Please',
-    'Good',
-    'Nice'
+    'Help'
 ]
 
 SEQ_LEN = 30

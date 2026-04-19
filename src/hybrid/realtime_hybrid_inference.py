@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import mediapipe as mp
+import subprocess
 from collections import deque
 from tensorflow.keras.models import load_model
 
@@ -22,10 +23,36 @@ SEQUENCE_LENGTH = 30
 CONF_THRESHOLD = 0.85
 STABLE_FRAMES = 5
 COOLDOWN_FRAMES = 15
+DISPLAY_HOLD_FRAMES = 20
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 
+# =======================
+# Windows TTS
+# =======================
+last_spoken_text = None
+
+def speak_text_windows(text):
+    if text in ['Idle', 'Waiting...']:
+        return
+
+    safe_text = text.replace("'", "''")
+    ps_command = (
+        "Add-Type -AssemblyName System.Speech;"
+        "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
+        f"$speak.Speak('{safe_text}')"
+    )
+
+    subprocess.Popen(
+        ["powershell", "-Command", ps_command],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+# =======================
+# MediaPipe helpers
+# =======================
 def mediapipe_detection(frame, model):
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     image.flags.writeable = False
@@ -93,7 +120,12 @@ def prob_viz(res, labels, frame):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2, cv2.LINE_AA)
     return output
 
+# =======================
+# Main
+# =======================
 def main():
+    global last_spoken_text
+
     model = load_model(MODEL_PATH)
 
     sequence = deque(maxlen=SEQUENCE_LENGTH)
@@ -101,6 +133,7 @@ def main():
 
     accepted_text = "Waiting..."
     cooldown = 0
+    display_hold = 0
 
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -128,6 +161,12 @@ def main():
             if cooldown > 0:
                 cooldown -= 1
 
+            if display_hold > 0:
+                display_hold -= 1
+            elif not hands_present(results):
+                accepted_text = "Waiting..."
+                last_spoken_text = None
+
             if len(sequence) == SEQUENCE_LENGTH:
                 current_probs = model.predict(np.expand_dims(np.array(sequence), axis=0), verbose=0)[0]
                 pred_idx = int(np.argmax(current_probs))
@@ -146,9 +185,14 @@ def main():
                 if stable and cooldown == 0 and allow_prediction and pred_conf >= CONF_THRESHOLD:
                     if pred_label != 'Idle':
                         accepted_text = pred_label
+                        display_hold = DISPLAY_HOLD_FRAMES
                         cooldown = COOLDOWN_FRAMES
                         sequence.clear()
                         pred_history.clear()
+
+                        if pred_label != last_spoken_text:
+                            speak_text_windows(pred_label)
+                            last_spoken_text = pred_label
 
                 if not allow_prediction:
                     pred_history.clear()

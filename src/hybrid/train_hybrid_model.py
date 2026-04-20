@@ -5,9 +5,9 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_10')
 MODELS_DIR = os.path.join(PROJECT_ROOT, 'models')
-LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'hybrid')
+LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'hybrid_10')
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -41,7 +41,7 @@ model.compile(
 callbacks = [
     TensorBoard(log_dir=LOGS_DIR),
     ModelCheckpoint(
-        os.path.join(MODELS_DIR, 'best_hybrid_model_6words_idle.h5'),
+        os.path.join(MODELS_DIR, 'best_hybrid_model_10words_idle.h5'),
         monitor='val_categorical_accuracy',
         save_best_only=True,
         mode='max',
@@ -49,7 +49,7 @@ callbacks = [
     )
 ]
 
-history = model.fit(
+model.fit(
     X_train, y_train,
     validation_data=(X_val, y_val),
     epochs=150,
@@ -61,6 +61,4 @@ test_loss, test_acc = model.evaluate(X_test, y_test, verbose=1)
 
 print(f"Test loss: {test_loss:.4f}")
 print(f"Test accuracy: {test_acc:.4f}")
-
-model.save(os.path.join(MODELS_DIR, 'final_hybrid_model_6words_idle.h5'))
-print("Saved final hybrid model.")
+print("Best hybrid 10-word model already saved.")

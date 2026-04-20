@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_6words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_10words_idle.h5')
 
 CLASSES = [
     'Nice',
@@ -16,21 +16,22 @@ CLASSES = [
     'No',
     'Water',
     'Help',
+    'Hello',
+    'Fine',
+    'Good',
+    'Please',
     'Idle'
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.85
-STABLE_FRAMES = 5
-COOLDOWN_FRAMES = 15
+CONF_THRESHOLD = 0.90
+STABLE_FRAMES = 6
+COOLDOWN_FRAMES = 18
 DISPLAY_HOLD_FRAMES = 20
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 
-# =======================
-# Windows TTS
-# =======================
 last_spoken_text = None
 
 def speak_text_windows(text):
@@ -50,9 +51,6 @@ def speak_text_windows(text):
         stderr=subprocess.DEVNULL
     )
 
-# =======================
-# MediaPipe helpers
-# =======================
 def mediapipe_detection(frame, model):
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     image.flags.writeable = False
@@ -110,19 +108,20 @@ def prob_viz(res, labels, frame):
         (255,0,0),
         (0,255,255),
         (255,0,255),
+        (128,128,255),
+        (255,128,0),
+        (128,255,0),
+        (0,128,255),
         (100,100,100)
     ]
 
     for i, prob in enumerate(res):
         color = colors[i % len(colors)]
-        cv2.rectangle(output, (0, 60 + i*35), (int(prob * 220), 85 + i*35), color, -1)
-        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 80 + i*35),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2, cv2.LINE_AA)
+        cv2.rectangle(output, (0, 60 + i*30), (int(prob * 220), 82 + i*30), color, -1)
+        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 78 + i*30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
     return output
 
-# =======================
-# Main
-# =======================
 def main():
     global last_spoken_text
 
@@ -199,7 +198,7 @@ def main():
 
             image = prob_viz(current_probs, CLASSES, image)
 
-            cv2.rectangle(image, (0, 0), (900, 50), (50, 50, 50), -1)
+            cv2.rectangle(image, (0, 0), (1000, 50), (50, 50, 50), -1)
             cv2.putText(image, f"Output: {accepted_text}", (10, 35),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
 

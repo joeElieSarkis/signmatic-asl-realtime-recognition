@@ -2,11 +2,12 @@ import os
 import cv2
 import numpy as np
 import mediapipe as mp
+import subprocess
 from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_custom_model_6words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_custom_model_10words_idle.h5')
 
 CLASSES = [
     'Nice',
@@ -15,16 +16,40 @@ CLASSES = [
     'No',
     'Water',
     'Help',
+    'Hello',
+    'Fine',
+    'Good',
+    'Please',
     'Idle'
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.85
-STABLE_FRAMES = 5
-COOLDOWN_FRAMES = 15
+CONF_THRESHOLD = 0.90
+STABLE_FRAMES = 6
+COOLDOWN_FRAMES = 18
+DISPLAY_HOLD_FRAMES = 20
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
+
+last_spoken_text = None
+
+def speak_text_windows(text):
+    if text in ['Idle', 'Waiting...']:
+        return
+
+    safe_text = text.replace("'", "''")
+    ps_command = (
+        "Add-Type -AssemblyName System.Speech;"
+        "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
+        f"$speak.Speak('{safe_text}')"
+    )
+
+    subprocess.Popen(
+        ["powershell", "-Command", ps_command],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
 
 def mediapipe_detection(frame, model):
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -83,6 +108,10 @@ def prob_viz(res, labels, frame):
         (255,0,0),
         (0,255,255),
         (255,0,255),
+        (128,128,255),
+        (255,128,0),
+        (128,255,0),
+        (0,128,255),
         (100,100,100)
     ]
 
@@ -94,14 +123,16 @@ def prob_viz(res, labels, frame):
     return output
 
 def main():
+    global last_spoken_text
+
     model = load_model(MODEL_PATH)
 
     sequence = deque(maxlen=SEQUENCE_LENGTH)
     pred_history = deque(maxlen=STABLE_FRAMES)
 
     accepted_text = "Waiting..."
-    accepted_conf = 0.0
     cooldown = 0
+    display_hold = 0
 
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -129,6 +160,12 @@ def main():
             if cooldown > 0:
                 cooldown -= 1
 
+            if display_hold > 0:
+                display_hold -= 1
+            elif not hands_present(results):
+                accepted_text = "Waiting..."
+                last_spoken_text = None
+
             if len(sequence) == SEQUENCE_LENGTH:
                 current_probs = model.predict(np.expand_dims(np.array(sequence), axis=0), verbose=0)[0]
                 pred_idx = int(np.argmax(current_probs))
@@ -147,17 +184,21 @@ def main():
                 if stable and cooldown == 0 and allow_prediction and pred_conf >= CONF_THRESHOLD:
                     if pred_label != 'Idle':
                         accepted_text = pred_label
-                        accepted_conf = pred_conf
+                        display_hold = DISPLAY_HOLD_FRAMES
                         cooldown = COOLDOWN_FRAMES
                         sequence.clear()
                         pred_history.clear()
+
+                        if pred_label != last_spoken_text:
+                            speak_text_windows(pred_label)
+                            last_spoken_text = pred_label
 
                 if not allow_prediction:
                     pred_history.clear()
 
             image = prob_viz(current_probs, CLASSES, image)
 
-            cv2.rectangle(image, (0, 0), (900, 50), (50, 50, 50), -1)
+            cv2.rectangle(image, (0, 0), (1000, 50), (50, 50, 50), -1)
             cv2.putText(image, f"Output: {accepted_text}", (10, 35),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
 

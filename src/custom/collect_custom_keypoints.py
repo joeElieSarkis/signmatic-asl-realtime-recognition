@@ -13,6 +13,10 @@ CLASSES = [
     'No',
     'Water',
     'Help',
+    'Hello',
+    'Fine',
+    'Good',
+    'Please',
     'Idle'
 ]
 
@@ -20,10 +24,14 @@ SEQUENCES_PER_CLASS = {
     'Nice': 200,
     'Eat': 200,
     'Yes': 200,
-    'No': 200,
+    'No': 280,
     'Water': 200,
     'Help': 200,
-    'Idle': 250
+    'Hello': 220,
+    'Fine': 220,
+    'Good': 220,
+    'Please': 220,
+    'Idle': 280
 }
 
 SEQUENCE_LENGTH = 30
@@ -54,7 +62,7 @@ def draw_styled_landmarks(image, results):
             image,
             results.left_hand_landmarks,
             mp_holistic.HAND_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4), 
+            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
             mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
         )
 
@@ -63,7 +71,7 @@ def draw_styled_landmarks(image, results):
             image,
             results.right_hand_landmarks,
             mp_holistic.HAND_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4), 
+            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
             mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
         )
 

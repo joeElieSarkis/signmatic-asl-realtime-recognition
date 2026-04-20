@@ -5,7 +5,7 @@ from tensorflow.keras.utils import to_categorical
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints')
-OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'processed_custom')
+OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'processed_custom_10')
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -16,6 +16,10 @@ CLASSES = [
     'No',
     'Water',
     'Help',
+    'Hello',
+    'Fine',
+    'Good',
+    'Please',
     'Idle'
 ]
 
@@ -83,7 +87,7 @@ with open(os.path.join(OUT_DIR, 'labels.txt'), 'w', encoding='utf-8') as f:
     for label in CLASSES:
         f.write(label + '\n')
 
-print("Custom dataset built.")
+print("Custom 10-word dataset built.")
 print("X_train:", X_train.shape)
 print("X_val  :", X_val.shape)
 print("X_test :", X_test.shape)

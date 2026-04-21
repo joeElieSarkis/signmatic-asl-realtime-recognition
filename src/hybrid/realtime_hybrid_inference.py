@@ -24,10 +24,11 @@ CLASSES = [
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.90
-STABLE_FRAMES = 6
+CONF_THRESHOLD = 0.92
+STABLE_FRAMES = 5
 COOLDOWN_FRAMES = 18
 DISPLAY_HOLD_FRAMES = 20
+RECENT_HANDS_FRAMES = 8
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
@@ -129,6 +130,7 @@ def main():
 
     sequence = deque(maxlen=SEQUENCE_LENGTH)
     pred_history = deque(maxlen=STABLE_FRAMES)
+    recent_hands = deque(maxlen=RECENT_HANDS_FRAMES)
 
     accepted_text = "Waiting..."
     cooldown = 0
@@ -152,6 +154,9 @@ def main():
             image, results = mediapipe_detection(frame, holistic)
             draw_styled_landmarks(image, results)
 
+            current_hands = hands_present(results)
+            recent_hands.append(current_hands)
+
             kp = extract_keypoints(results)
             sequence.append(kp)
 
@@ -162,7 +167,7 @@ def main():
 
             if display_hold > 0:
                 display_hold -= 1
-            elif not hands_present(results):
+            elif not any(recent_hands):
                 accepted_text = "Waiting..."
                 last_spoken_text = None
 
@@ -179,21 +184,22 @@ def main():
                     len(set(pred_history)) == 1
                 )
 
-                allow_prediction = hands_present(results)
+                had_recent_hands = any(recent_hands)
 
-                if stable and cooldown == 0 and allow_prediction and pred_conf >= CONF_THRESHOLD:
+                if stable and cooldown == 0 and had_recent_hands and pred_conf >= CONF_THRESHOLD:
                     if pred_label != 'Idle':
                         accepted_text = pred_label
                         display_hold = DISPLAY_HOLD_FRAMES
                         cooldown = COOLDOWN_FRAMES
                         sequence.clear()
                         pred_history.clear()
+                        recent_hands.clear()
 
                         if pred_label != last_spoken_text:
                             speak_text_windows(pred_label)
                             last_spoken_text = pred_label
 
-                if not allow_prediction:
+                if not any(recent_hands):
                     pred_history.clear()
 
             image = prob_viz(current_probs, CLASSES, image)

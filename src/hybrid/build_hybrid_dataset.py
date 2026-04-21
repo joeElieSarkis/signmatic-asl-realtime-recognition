@@ -29,7 +29,6 @@ CLASSES = WORDS + ['Idle']
 SEQ_LEN = 30
 FEATURE_DIM = 258
 
-# optional caps if needed later
 CUSTOM_LIMIT_PER_WORD = None
 MSASL_LIMIT_PER_WORD = None
 IDLE_LIMIT = None

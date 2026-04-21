@@ -43,6 +43,7 @@ for label in CLASSES:
 
         frames = []
         ok = True
+        
         for frame_num in range(SEQUENCE_LENGTH):
             fpath = os.path.join(seq_dir, f'{frame_num}.npy')
             if not os.path.exists(fpath):

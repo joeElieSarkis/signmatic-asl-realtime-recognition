@@ -49,7 +49,7 @@ callbacks = [
     )
 ]
 
-history = model.fit(
+model.fit(
     X_train, y_train,
     validation_data=(X_val, y_val),
     epochs=150,

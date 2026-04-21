@@ -21,15 +21,15 @@ CLASSES = [
 ]
 
 SEQUENCES_PER_CLASS = {
-    'Nice': 200,
+    'Nice': 280,
     'Eat': 200,
     'Yes': 200,
     'No': 280,
-    'Water': 200,
+    'Water': 280,
     'Help': 200,
     'Hello': 220,
-    'Fine': 220,
-    'Good': 220,
+    'Fine': 240,
+    'Good': 240,
     'Please': 220,
     'Idle': 280
 }

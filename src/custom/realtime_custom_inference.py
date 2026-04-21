@@ -24,9 +24,9 @@ CLASSES = [
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.90
-STABLE_FRAMES = 6
-COOLDOWN_FRAMES = 18
+CONF_THRESHOLD = 0.92
+STABLE_FRAMES = 7
+COOLDOWN_FRAMES = 20
 DISPLAY_HOLD_FRAMES = 20
 
 mp_holistic = mp.solutions.holistic
@@ -117,9 +117,9 @@ def prob_viz(res, labels, frame):
 
     for i, prob in enumerate(res):
         color = colors[i % len(colors)]
-        cv2.rectangle(output, (0, 60 + i*35), (int(prob * 220), 85 + i*35), color, -1)
-        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 80 + i*35),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2, cv2.LINE_AA)
+        cv2.rectangle(output, (0, 60 + i*30), (int(prob * 220), 82 + i*30), color, -1)
+        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 78 + i*30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
     return output
 
 def main():

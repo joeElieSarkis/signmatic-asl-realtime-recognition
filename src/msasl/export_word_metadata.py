@@ -20,7 +20,8 @@ TARGET_WORDS = {
     'fine': 'Fine',
     'please': 'Please',
     'good': 'Good',
-    'nice': 'Nice'
+    'nice': 'Nice',
+    'give': 'Give'
 }
 
 def load_json(path):

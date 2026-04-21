@@ -17,13 +17,16 @@ CLASSES = [
     'Fine',
     'Good',
     'Please',
+    'Give',
+    'Us',
+    'A',
     'Idle'
 ]
 
 SEQUENCES_PER_CLASS = {
     'Nice': 280,
     'Eat': 200,
-    'Yes': 200,
+    'Yes': 250,
     'No': 280,
     'Water': 280,
     'Help': 200,
@@ -31,6 +34,9 @@ SEQUENCES_PER_CLASS = {
     'Fine': 240,
     'Good': 240,
     'Please': 220,
+    'Give': 240,
+    'Us': 260,
+    'A': 260,
     'Idle': 280
 }
 
@@ -53,8 +59,8 @@ def draw_styled_landmarks(image, results):
             image,
             results.pose_landmarks,
             mp_holistic.POSE_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4),
-            mp_drawing.DrawingSpec(color=(121,44,250), thickness=2, circle_radius=2)
+            mp_drawing.DrawingSpec(color=(121, 22, 76), thickness=2, circle_radius=4),
+            mp_drawing.DrawingSpec(color=(121, 44, 250), thickness=2, circle_radius=2)
         )
 
     if results.left_hand_landmarks:
@@ -62,8 +68,8 @@ def draw_styled_landmarks(image, results):
             image,
             results.left_hand_landmarks,
             mp_holistic.HAND_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
-            mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
+            mp_drawing.DrawingSpec(color=(80, 22, 10), thickness=2, circle_radius=4),
+            mp_drawing.DrawingSpec(color=(80, 44, 121), thickness=2, circle_radius=2)
         )
 
     if results.right_hand_landmarks:
@@ -71,17 +77,14 @@ def draw_styled_landmarks(image, results):
             image,
             results.right_hand_landmarks,
             mp_holistic.HAND_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
-            mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
+            mp_drawing.DrawingSpec(color=(80, 22, 10), thickness=2, circle_radius=4),
+            mp_drawing.DrawingSpec(color=(80, 44, 121), thickness=2, circle_radius=2)
         )
 
 def extract_keypoints(results):
-    pose = np.array([[res.x, res.y, res.z, res.visibility]
-                     for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
-    lh = np.array([[res.x, res.y, res.z]
-                   for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21 * 3)
-    rh = np.array([[res.x, res.y, res.z]
-                   for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21 * 3)
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
+    lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21 * 3)
+    rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21 * 3)
     return np.concatenate([pose, lh, rh]).astype(np.float32)
 
 def get_next_sequence_index(class_dir):
@@ -105,11 +108,7 @@ def main():
         print("Could not open camera.")
         return
 
-    with mp_holistic.Holistic(
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5
-    ) as holistic:
-
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         for cls in CLASSES:
             class_dir = os.path.join(DATA_DIR, cls)
             start_seq = get_next_sequence_index(class_dir)
@@ -134,12 +133,9 @@ def main():
                     draw_styled_landmarks(image, results)
 
                     if frame_num == 0:
-                        cv2.putText(image, f'CLASS: {cls}', (20, 40),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                        cv2.putText(image, f'SEQUENCE: {seq_idx + 1}/{target_total}', (20, 80),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
-                        cv2.putText(image, 'GET READY', (20, 130),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                        cv2.putText(image, f'CLASS: {cls}', (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                        cv2.putText(image, f'SEQUENCE: {seq_idx + 1}/{target_total}', (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
+                        cv2.putText(image, 'GET READY', (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
                         cv2.imshow('Custom Data Collection', image)
                         key = cv2.waitKey(1200)
                         if key & 0xFF == ord('q'):
@@ -160,12 +156,9 @@ def main():
                     keypoints = extract_keypoints(results)
                     np.save(os.path.join(seq_dir, f'{frame_num}.npy'), keypoints)
 
-                    cv2.putText(image, f'CLASS: {cls}', (20, 40),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                    cv2.putText(image, f'SEQUENCE: {seq_idx + 1}/{target_total}', (20, 80),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
-                    cv2.putText(image, f'FRAME: {frame_num + 1}/{SEQUENCE_LENGTH}', (20, 120),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2, cv2.LINE_AA)
+                    cv2.putText(image, f'CLASS: {cls}', (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                    cv2.putText(image, f'SEQUENCE: {seq_idx + 1}/{target_total}', (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
+                    cv2.putText(image, f'FRAME: {frame_num + 1}/{SEQUENCE_LENGTH}', (20, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2, cv2.LINE_AA)
                     cv2.imshow('Custom Data Collection', image)
 
                     key = cv2.waitKey(1)

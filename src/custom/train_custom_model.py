@@ -5,9 +5,9 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'processed_custom_10')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'processed_custom_13')
 MODELS_DIR = os.path.join(PROJECT_ROOT, 'models')
-LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'custom_10')
+LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'custom_13')
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -41,7 +41,7 @@ model.compile(
 callbacks = [
     TensorBoard(log_dir=LOGS_DIR),
     ModelCheckpoint(
-        os.path.join(MODELS_DIR, 'best_custom_model_10words_idle.h5'),
+        os.path.join(MODELS_DIR, 'best_custom_model_13words_idle.h5'),
         monitor='val_categorical_accuracy',
         save_best_only=True,
         mode='max',

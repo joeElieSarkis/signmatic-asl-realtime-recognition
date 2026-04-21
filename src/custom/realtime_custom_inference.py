@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_custom_model_10words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_custom_model_13words_idle.h5')
 
 CLASSES = [
     'Nice',
@@ -20,6 +20,9 @@ CLASSES = [
     'Fine',
     'Good',
     'Please',
+    'Give',
+    'Us',
+    'A',
     'Idle'
 ]
 
@@ -88,12 +91,9 @@ def draw_styled_landmarks(image, results):
         )
 
 def extract_keypoints(results):
-    pose = np.array([[res.x, res.y, res.z, res.visibility]
-                     for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
-    lh = np.array([[res.x, res.y, res.z]
-                   for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21 * 3)
-    rh = np.array([[res.x, res.y, res.z]
-                   for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21 * 3)
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33 * 4)
+    lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21 * 3)
+    rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21 * 3)
     return np.concatenate([pose, lh, rh]).astype(np.float32)
 
 def hands_present(results):
@@ -112,14 +112,16 @@ def prob_viz(res, labels, frame):
         (255,128,0),
         (128,255,0),
         (0,128,255),
+        (180,80,200),
+        (80,180,200),
+        (200,180,80),
         (100,100,100)
     ]
 
     for i, prob in enumerate(res):
         color = colors[i % len(colors)]
         cv2.rectangle(output, (0, 60 + i*30), (int(prob * 220), 82 + i*30), color, -1)
-        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 78 + i*30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 78 + i*30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
     return output
 
 def main():
@@ -139,11 +141,7 @@ def main():
         print("Could not open camera.")
         return
 
-    with mp_holistic.Holistic(
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5
-    ) as holistic:
-
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -174,11 +172,7 @@ def main():
 
                 pred_history.append(pred_idx)
 
-                stable = (
-                    len(pred_history) == STABLE_FRAMES and
-                    len(set(pred_history)) == 1
-                )
-
+                stable = len(pred_history) == STABLE_FRAMES and len(set(pred_history)) == 1
                 allow_prediction = hands_present(results)
 
                 if stable and cooldown == 0 and allow_prediction and pred_conf >= CONF_THRESHOLD:
@@ -199,8 +193,7 @@ def main():
             image = prob_viz(current_probs, CLASSES, image)
 
             cv2.rectangle(image, (0, 0), (1000, 50), (50, 50, 50), -1)
-            cv2.putText(image, f"Output: {accepted_text}", (10, 35),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+            cv2.putText(image, f"Output: {accepted_text}", (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
 
             cv2.imshow("Custom ASL Realtime", image)
 

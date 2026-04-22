@@ -21,7 +21,16 @@ TARGET_WORDS = {
     'please': 'Please',
     'good': 'Good',
     'nice': 'Nice',
-    'give': 'Give'
+    'give': 'Give',
+    'we': 'We',
+    'have': 'Have',
+    'work': 'Worked',
+    'so': 'So',
+    'hard': 'Hard',
+    'live': 'Live',
+    'love': 'Love',
+    'university': 'University',
+    'thanks': 'Thanks'
 }
 
 def load_json(path):
@@ -45,3 +54,7 @@ with open(out_path, 'w', encoding='utf-8') as f:
 
 print(f"Saved {len(all_items)} matching samples to:")
 print(out_path)
+
+print("\nWords exported:")
+for word, label in TARGET_WORDS.items():
+    print(f"{word:14s} -> {label}")

@@ -35,5 +35,6 @@ for item in data:
     if vid in video_ids_present:
         counts[word] += 1
 
+print("Downloaded counts by word:\n")
 for word, c in sorted(counts.items(), key=lambda x: x[1], reverse=True):
-    print(f"{word:12s} {c}")
+    print(f"{word:14s} {c}")

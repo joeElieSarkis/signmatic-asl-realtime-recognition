@@ -24,7 +24,7 @@ TARGET_WORDS = {
     'give': 'Give',
     'we': 'We',
     'have': 'Have',
-    'work': 'Worked',
+    'work': 'Work',
     'so': 'So',
     'hard': 'Hard',
     'live': 'Live',

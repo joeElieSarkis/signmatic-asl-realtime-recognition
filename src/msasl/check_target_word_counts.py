@@ -4,18 +4,15 @@ from collections import defaultdict
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'MSASL', 'MSASL_download')
-
 TRAIN_JSON = os.path.join(DATA_DIR, 'MSASL_train.json')
 VAL_JSON = os.path.join(DATA_DIR, 'MSASL_val.json')
 TEST_JSON = os.path.join(DATA_DIR, 'MSASL_test.json')
 
 TARGET_WORDS = [
-    'water',
     'high',
     'grade',
     'we',
     'have',
-    'worked',
     'work',
     'so',
     'hard',
@@ -24,7 +21,8 @@ TARGET_WORDS = [
     'lebanese',
     'international',
     'university',
-    'thanks'
+    'thanks',
+    'water'
 ]
 
 def load_json(path):
@@ -55,7 +53,7 @@ for item in test:
         counts[word]['test'] += 1
         counts[word]['total'] += 1
 
-print("Target word counts in MSASL:\n")
+print("Candidate MSASL counts:\n")
 for word in TARGET_WORDS:
     c = counts[word]
     print(f"{word:14s} total={c['total']:4d} train={c['train']:4d} val={c['val']:4d} test={c['test']:4d}")

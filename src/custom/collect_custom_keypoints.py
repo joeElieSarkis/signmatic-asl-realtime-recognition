@@ -18,25 +18,39 @@ CLASSES = [
     'Good',
     'Please',
     'Give',
-    'Us',
+    'We',
     'A',
+    'Have',
+    'Work',
+    'So',
+    'Hard',
+    'Live',
+    'Love',
+    'Thanks',
     'Idle'
 ]
 
 SEQUENCES_PER_CLASS = {
     'Nice': 280,
     'Eat': 200,
-    'Yes': 250,
-    'No': 280,
-    'Water': 280,
+    'Yes': 280,
+    'No': 320,
+    'Water': 320,
     'Help': 200,
     'Hello': 220,
     'Fine': 240,
     'Good': 240,
     'Please': 220,
     'Give': 240,
-    'Us': 260,
+    'We': 260,
     'A': 260,
+    'Have': 200,
+    'Work': 200,
+    'So': 200,
+    'Hard': 200,
+    'Live': 200,
+    'Love': 200,
+    'Thanks': 200,
     'Idle': 280
 }
 
@@ -59,8 +73,8 @@ def draw_styled_landmarks(image, results):
             image,
             results.pose_landmarks,
             mp_holistic.POSE_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(121, 22, 76), thickness=2, circle_radius=4),
-            mp_drawing.DrawingSpec(color=(121, 44, 250), thickness=2, circle_radius=2)
+            mp_drawing.DrawingSpec(color=(121,22,76), thickness=2, circle_radius=4),
+            mp_drawing.DrawingSpec(color=(121,44,250), thickness=2, circle_radius=2)
         )
 
     if results.left_hand_landmarks:
@@ -68,8 +82,8 @@ def draw_styled_landmarks(image, results):
             image,
             results.left_hand_landmarks,
             mp_holistic.HAND_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(80, 22, 10), thickness=2, circle_radius=4),
-            mp_drawing.DrawingSpec(color=(80, 44, 121), thickness=2, circle_radius=2)
+            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
+            mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
         )
 
     if results.right_hand_landmarks:
@@ -77,8 +91,8 @@ def draw_styled_landmarks(image, results):
             image,
             results.right_hand_landmarks,
             mp_holistic.HAND_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(80, 22, 10), thickness=2, circle_radius=4),
-            mp_drawing.DrawingSpec(color=(80, 44, 121), thickness=2, circle_radius=2)
+            mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=4),
+            mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=2)
         )
 
 def extract_keypoints(results):

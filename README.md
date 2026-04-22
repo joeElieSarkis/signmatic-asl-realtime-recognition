@@ -27,6 +27,9 @@ A real-time American Sign Language (ASL) recognition system that uses MediaPipe 
 - `src/hybrid/`  
   Hybrid dataset building, model training, and realtime inference using combined MS-ASL and custom data
 
+- `src/wlasl/`  
+  Early experimental pipeline using the WLASL dataset (not used in the final system)
+
 - `data/`  
   Local datasets, extracted keypoints, and processed training arrays  
   Not included in the repository
@@ -48,7 +51,17 @@ Deploy a stable, real-time ASL recognition system on an embedded platform such a
 
 ## Current Scope
 
-The system currently focuses on isolated-word recognition with a constrained vocabulary. The vocabulary is being expanded incrementally through hybrid training with MS-ASL and custom data to improve real-time usability and generalization.
+The system focuses on isolated-word recognition with a constrained vocabulary. The vocabulary is being expanded incrementally through hybrid training with MS-ASL and custom data to improve real-time usability and generalization.
+
+## Deprecated / Experimental
+
+- `src/wlasl/`  
+  Early experiments using the WLASL dataset for sign-language recognition.  
+  This approach was later abandoned due to limited performance and difficulty adapting it to the current real-time pipeline.
+
+- `data/WLASL/`  
+  Intermediate data from WLASL experiments.  
+  This data is not included in the repository and is not part of the current pipeline.
 
 ## Acknowledgment
 

@@ -20,7 +20,16 @@ TARGET_WORDS = {
     'please': 'Please',
     'good': 'Good',
     'nice': 'Nice',
-    'give': 'Give'
+    'give': 'Give',
+    'we': 'We',
+    'have': 'Have',
+    'work': 'Worked',
+    'so': 'So',
+    'hard': 'Hard',
+    'live': 'Live',
+    'love': 'Love',
+    'university': 'University',
+    'thanks': 'Thanks'
 }
 
 os.makedirs(OUT_DIR, exist_ok=True)

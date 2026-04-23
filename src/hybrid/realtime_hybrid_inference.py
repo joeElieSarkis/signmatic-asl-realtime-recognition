@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_13words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_20words_idle.h5')
 
 CLASSES = [
     'Nice',
@@ -21,17 +21,25 @@ CLASSES = [
     'Good',
     'Please',
     'Give',
-    'Us',
+    'We',
     'A',
+    'Have',
+    'Work',
+    'So',
+    'Hard',
+    'Live',
+    'Love',
+    'Thanks',
     'Idle'
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.92
+CONF_THRESHOLD = 0.88
 STABLE_FRAMES = 5
-COOLDOWN_FRAMES = 18
-DISPLAY_HOLD_FRAMES = 20
+COOLDOWN_FRAMES = 12
+DISPLAY_HOLD_FRAMES = 30
 RECENT_HANDS_FRAMES = 8
+MAX_SENTENCE_WORDS = 14
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
@@ -39,7 +47,7 @@ mp_drawing = mp.solutions.drawing_utils
 last_spoken_text = None
 
 def speak_text_windows(text):
-    if text in ['Idle', 'Waiting...']:
+    if not text:
         return
 
     safe_text = text.replace("'", "''")
@@ -110,20 +118,31 @@ def prob_viz(res, labels, frame):
         (0,255,255),
         (255,0,255),
         (128,128,255),
-        (255,128,0),
-        (128,255,0),
-        (0,128,255),
-        (180,80,200),
-        (80,180,200),
-        (200,180,80),
-        (100,100,100)
+        (255,128,0)
     ]
 
-    for i, prob in enumerate(res):
-        color = colors[i % len(colors)]
-        cv2.rectangle(output, (0, 60 + i*30), (int(prob * 220), 82 + i*30), color, -1)
-        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 78 + i*30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
+    top_indices = np.argsort(res)[::-1][:8]
+
+    for row, i in enumerate(top_indices):
+        prob = float(res[i])
+        color = colors[row % len(colors)]
+        y1 = 110 + row * 28
+        y2 = y1 + 20
+        cv2.rectangle(output, (0, y1), (int(prob * 260), y2), color, -1)
+        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, y2 - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255), 2, cv2.LINE_AA)
+
     return output
+
+def context_word(raw_word, sentence):
+    prev_word = sentence[-1] if sentence else None
+
+    if raw_word == 'We' and prev_word == 'Give':
+        return 'Us'
+
+    if raw_word == 'Work' and prev_word == 'Have':
+        return 'Worked'
+
+    return raw_word
 
 def main():
     global last_spoken_text
@@ -135,6 +154,7 @@ def main():
     recent_hands = deque(maxlen=RECENT_HANDS_FRAMES)
 
     accepted_text = "Waiting..."
+    sentence = []
     cooldown = 0
     display_hold = 0
 
@@ -182,30 +202,43 @@ def main():
 
                 if stable and cooldown == 0 and had_recent_hands and pred_conf >= CONF_THRESHOLD:
                     if pred_label != 'Idle':
-                        accepted_text = pred_label
+                        final_word = context_word(pred_label, sentence)
+                        accepted_text = final_word
+                        sentence.append(final_word)
+
+                        if len(sentence) > MAX_SENTENCE_WORDS:
+                            sentence = sentence[-MAX_SENTENCE_WORDS:]
+
                         display_hold = DISPLAY_HOLD_FRAMES
                         cooldown = COOLDOWN_FRAMES
                         sequence.clear()
                         pred_history.clear()
                         recent_hands.clear()
 
-                        if pred_label != last_spoken_text:
-                            speak_text_windows(pred_label)
-                            last_spoken_text = pred_label
+                        if final_word != last_spoken_text:
+                            speak_text_windows(final_word)
+                            last_spoken_text = final_word
 
                 if not any(recent_hands):
                     pred_history.clear()
 
             image = prob_viz(current_probs, CLASSES, image)
 
-            cv2.rectangle(image, (0, 0), (1000, 50), (50, 50, 50), -1)
+            cv2.rectangle(image, (0, 0), (1400, 50), (50, 50, 50), -1)
             cv2.putText(image, f"Output: {accepted_text}", (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+
+            cv2.rectangle(image, (0, 50), (1400, 95), (30, 30, 30), -1)
+            cv2.putText(image, "Sentence: " + " ".join(sentence), (10, 82), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
 
             cv2.imshow("Hybrid ASL Realtime", image)
 
             key = cv2.waitKey(10) & 0xFF
             if key == ord('q'):
                 break
+            if key == ord('c'):
+                sentence = []
+                accepted_text = "Waiting..."
+                last_spoken_text = None
 
     cap.release()
     cv2.destroyAllWindows()

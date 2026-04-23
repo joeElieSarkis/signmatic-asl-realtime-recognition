@@ -8,7 +8,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 
 CUSTOM_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints')
 MSASL_DIR = os.path.join(PROJECT_ROOT, 'data', 'MSASL', 'MSASL_keypoints')
-OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_13')
+OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_20')
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -24,10 +24,40 @@ WORDS = [
     'Good',
     'Please',
     'Give',
-    'Us',
-    'A'
+    'We',
+    'A',
+    'Have',
+    'Work',
+    'So',
+    'Hard',
+    'Live',
+    'Love',
+    'Thanks'
 ]
+
 CLASSES = WORDS + ['Idle']
+
+MSASL_WORDS = {
+    'Nice',
+    'Eat',
+    'Yes',
+    'No',
+    'Water',
+    'Help',
+    'Hello',
+    'Fine',
+    'Good',
+    'Please',
+    'Give',
+    'We',
+    'Have',
+    'Work',
+    'So',
+    'Hard',
+    'Live',
+    'Love',
+    'Thanks'
+}
 
 SEQ_LEN = 30
 FEATURE_DIM = 258
@@ -96,6 +126,7 @@ def load_msasl_sequences(label):
     for fname in sorted(os.listdir(label_dir)):
         if not fname.endswith('.npy'):
             continue
+
         fpath = os.path.join(label_dir, fname)
         seq = np.load(fpath)
 
@@ -113,10 +144,14 @@ source_counts = defaultdict(lambda: {'custom': 0, 'msasl': 0})
 
 for label in WORDS:
     custom_samples = load_custom_sequences(label)
-    msasl_samples = load_msasl_sequences(label)
+
+    msasl_samples = []
+    if label in MSASL_WORDS:
+        msasl_samples = load_msasl_sequences(label)
 
     if CUSTOM_LIMIT_PER_WORD is not None:
         custom_samples = custom_samples[:CUSTOM_LIMIT_PER_WORD]
+
     if MSASL_LIMIT_PER_WORD is not None:
         msasl_samples = msasl_samples[:MSASL_LIMIT_PER_WORD]
 
@@ -168,7 +203,7 @@ with open(os.path.join(OUT_DIR, 'labels.txt'), 'w', encoding='utf-8') as f:
     for label in CLASSES:
         f.write(label + '\n')
 
-print("Hybrid 13-word dataset built.")
+print("Hybrid 20-word dataset built.")
 print("X_train:", X_train.shape)
 print("X_val  :", X_val.shape)
 print("X_test :", X_test.shape)

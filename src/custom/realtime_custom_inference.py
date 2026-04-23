@@ -34,10 +34,10 @@ CLASSES = [
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.92
-STABLE_FRAMES = 7
-COOLDOWN_FRAMES = 20
-DISPLAY_HOLD_FRAMES = 20
+CONF_THRESHOLD = 0.88
+STABLE_FRAMES = 5
+COOLDOWN_FRAMES = 12
+DISPLAY_HOLD_FRAMES = 30
 MAX_SENTENCE_WORDS = 12
 
 mp_holistic = mp.solutions.holistic
@@ -117,26 +117,19 @@ def prob_viz(res, labels, frame):
         (0,255,255),
         (255,0,255),
         (128,128,255),
-        (255,128,0),
-        (128,255,0),
-        (0,128,255),
-        (180,80,200),
-        (80,180,200),
-        (200,180,80),
-        (160,80,80),
-        (80,160,80),
-        (80,80,160),
-        (210,120,50),
-        (50,210,120),
-        (120,50,210),
-        (150,150,60),
-        (100,100,100)
+        (255,128,0)
     ]
 
-    for i, prob in enumerate(res):
-        color = colors[i % len(colors)]
-        cv2.rectangle(output, (0, 60 + i * 28), (int(prob * 220), 82 + i * 28), color, -1)
-        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, 78 + i * 28), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255), 2, cv2.LINE_AA)
+    top_indices = np.argsort(res)[::-1][:8]
+
+    for row, i in enumerate(top_indices):
+        prob = float(res[i])
+        color = colors[row % len(colors)]
+        y1 = 110 + row * 28
+        y2 = y1 + 20
+        cv2.rectangle(output, (0, y1), (int(prob * 260), y2), color, -1)
+        cv2.putText(output, f"{labels[i]}: {prob:.2f}", (5, y2 - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255), 2, cv2.LINE_AA)
+
     return output
 
 def context_word(raw_word, sentence):
@@ -225,10 +218,10 @@ def main():
 
             image = prob_viz(current_probs, CLASSES, image)
 
-            cv2.rectangle(image, (0, 0), (1200, 50), (50, 50, 50), -1)
+            cv2.rectangle(image, (0, 0), (1400, 50), (50, 50, 50), -1)
             cv2.putText(image, f"Output: {accepted_text}", (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
 
-            cv2.rectangle(image, (0, 50), (1200, 95), (30, 30, 30), -1)
+            cv2.rectangle(image, (0, 50), (1400, 95), (30, 30, 30), -1)
             cv2.putText(image, "Sentence: " + " ".join(sentence), (10, 82), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
 
             cv2.imshow("Custom ASL Realtime", image)

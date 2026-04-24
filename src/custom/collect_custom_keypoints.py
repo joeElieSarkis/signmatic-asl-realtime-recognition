@@ -27,31 +27,41 @@ CLASSES = [
     'Live',
     'Love',
     'Thanks',
+    'High',
+    'Grade',
+    'Lebanese',
+    'International',
+    'University',
     'Idle'
 ]
 
 SEQUENCES_PER_CLASS = {
-    'Nice': 280,
-    'Eat': 200,
-    'Yes': 280,
-    'No': 320,
-    'Water': 320,
-    'Help': 200,
-    'Hello': 220,
-    'Fine': 240,
-    'Good': 240,
-    'Please': 220,
-    'Give': 240,
-    'We': 260,
-    'A': 260,
-    'Have': 200,
-    'Work': 200,
-    'So': 200,
-    'Hard': 200,
-    'Live': 200,
-    'Love': 200,
-    'Thanks': 200,
-    'Idle': 280
+    'Nice': 330,  ##Thery 50 each
+    'Eat': 250,  ##
+    'Yes': 330,  ##
+    'No': 350, ## 
+    'Water': 350,   ##
+    'Help': 250,  ##
+    'Hello': 270,   ##   
+    'Fine': 290,    ##  
+    'Good': 290,    ##
+    'Please': 270,   ##  
+    'Give': 290,   #...
+    'We': 340,
+    'A': 340,
+    'Have': 250,
+    'Work': 250,
+    'So': 250,
+    'Hard': 250,
+    'Live': 250,
+    'Love': 250,
+    'Thanks': 250,
+    'High': 290,
+    'Grade': 290,
+    'Lebanese': 290,
+    'International': 290,
+    'University': 270,
+    'Idle': 300
 }
 
 SEQUENCE_LENGTH = 30

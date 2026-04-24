@@ -8,7 +8,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 
 CUSTOM_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints')
 MSASL_DIR = os.path.join(PROJECT_ROOT, 'data', 'MSASL', 'MSASL_keypoints')
-OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_20')
+OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_24')
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -32,7 +32,12 @@ WORDS = [
     'Hard',
     'Live',
     'Love',
-    'Thanks'
+    'Thanks',
+    'High',
+    'Grade',
+    'Lebanese',
+    'International',
+    'University'
 ]
 
 CLASSES = WORDS + ['Idle']
@@ -56,7 +61,8 @@ MSASL_WORDS = {
     'Hard',
     'Live',
     'Love',
-    'Thanks'
+    'Thanks',
+    'University'
 }
 
 SEQ_LEN = 30
@@ -203,7 +209,7 @@ with open(os.path.join(OUT_DIR, 'labels.txt'), 'w', encoding='utf-8') as f:
     for label in CLASSES:
         f.write(label + '\n')
 
-print("Hybrid 20-word dataset built.")
+print("Hybrid 24-word dataset built.")
 print("X_train:", X_train.shape)
 print("X_val  :", X_val.shape)
 print("X_test :", X_test.shape)
@@ -211,4 +217,4 @@ print("X_test :", X_test.shape)
 print("\nPer-class source counts:")
 for label in CLASSES:
     c = source_counts[label]
-    print(f"{label:8s} custom={c['custom']:4d} msasl={c['msasl']:4d} total={c['custom'] + c['msasl']:4d}")
+    print(f"{label:14s} custom={c['custom']:4d} msasl={c['msasl']:4d} total={c['custom'] + c['msasl']:4d}")

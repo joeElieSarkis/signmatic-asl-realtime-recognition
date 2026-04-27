@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_24words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_25words_idle.h5')
 
 CLASSES = [
     'Nice',
@@ -285,4 +285,4 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main()
+    main() 

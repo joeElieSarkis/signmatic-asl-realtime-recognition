@@ -8,7 +8,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 
 CUSTOM_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints')
 MSASL_DIR = os.path.join(PROJECT_ROOT, 'data', 'MSASL', 'MSASL_keypoints')
-OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_24')
+OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_25')
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -209,7 +209,7 @@ with open(os.path.join(OUT_DIR, 'labels.txt'), 'w', encoding='utf-8') as f:
     for label in CLASSES:
         f.write(label + '\n')
 
-print("Hybrid 24-word dataset built.")
+print("Hybrid 25-word dataset built.")
 print("X_train:", X_train.shape)
 print("X_val  :", X_val.shape)
 print("X_test :", X_test.shape)

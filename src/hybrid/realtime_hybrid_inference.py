@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_25words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_31words_idle.h5')
 
 CLASSES = [
     'Nice',
@@ -35,6 +35,12 @@ CLASSES = [
     'Lebanese',
     'International',
     'University',
+    'Teacher',
+    'Happy',
+    'Like',
+    'Want',
+    'Deaf',
+    'School',
     'Idle'
 ]
 
@@ -56,10 +62,12 @@ def speak_text_windows(text):
         return
 
     spoken_text = text
+
     if text == 'Live':
         spoken_text = 'liv'
 
     safe_text = spoken_text.replace("'", "''")
+
     ps_command = (
         "Add-Type -AssemblyName System.Speech;"
         "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
@@ -122,55 +130,6 @@ def fit_text_from_end(text, max_chars):
         return text
     return text[-max_chars:]
 
-def prob_viz(res, labels, frame):
-    output = frame.copy()
-    colors = [
-        (245,117,16),
-        (117,245,16),
-        (16,117,245),
-        (255,0,0),
-        (0,255,255),
-        (255,0,255),
-        (128,128,255),
-        (255,128,0),
-        (128,255,0),
-        (0,128,255),
-        (180,80,200),
-        (80,180,200),
-        (200,180,80),
-        (160,80,80),
-        (80,160,80),
-        (80,80,160),
-        (210,120,50),
-        (50,210,120),
-        (120,50,210),
-        (150,150,60),
-        (220,100,100),
-        (100,220,100),
-        (100,100,220),
-        (220,180,80),
-        (180,80,220),
-        (100,100,100)
-    ]
-
-    start_x = 900
-    start_y = 110
-    row_h = 24
-    bar_max_w = 220
-    font_scale = 0.42
-    thickness = 1
-
-    for i, prob in enumerate(res):
-        color = colors[i % len(colors)]
-        y = start_y + i * row_h
-        bar_w = int(prob * bar_max_w)
-
-        cv2.putText(output, f"{labels[i]:<13}", (start_x, y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255,255,255), thickness, cv2.LINE_AA)
-        cv2.rectangle(output, (start_x + 110, y - 12), (start_x + 110 + bar_w, y - 2), color, -1)
-        cv2.putText(output, f"{prob:.2f}", (start_x + 340, y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255,255,255), thickness, cv2.LINE_AA)
-
-    return output
-
 def context_word(raw_word, sentence):
     prev_word = sentence[-1] if sentence else None
 
@@ -197,13 +156,18 @@ def main():
     display_hold = 0
 
     cap = cv2.VideoCapture(0)
+
     if not cap.isOpened():
         print("Could not open camera.")
         return
 
+    cv2.namedWindow("Hybrid ASL Realtime", cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty("Hybrid ASL Realtime", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while cap.isOpened():
             ret, frame = cap.read()
+
             if not ret:
                 break
 
@@ -216,8 +180,6 @@ def main():
             kp = extract_keypoints(results)
             sequence.append(kp)
 
-            current_probs = np.zeros(len(CLASSES), dtype=np.float32)
-
             if cooldown > 0:
                 cooldown -= 1
 
@@ -228,10 +190,10 @@ def main():
                 last_spoken_text = None
 
             if len(sequence) == SEQUENCE_LENGTH:
-                current_probs = model.predict(np.expand_dims(np.array(sequence), axis=0), verbose=0)[0]
-                pred_idx = int(np.argmax(current_probs))
+                probs = model.predict(np.expand_dims(np.array(sequence), axis=0), verbose=0)[0]
+                pred_idx = int(np.argmax(probs))
                 pred_label = CLASSES[pred_idx]
-                pred_conf = float(current_probs[pred_idx])
+                pred_conf = float(probs[pred_idx])
 
                 pred_history.append(pred_idx)
 
@@ -260,22 +222,22 @@ def main():
                 if not any(recent_hands):
                     pred_history.clear()
 
-            image = prob_viz(current_probs, CLASSES, image)
-
             output_line = fit_text_from_end(f"Output: {accepted_text}", 55)
-            sentence_line = fit_text_from_end("Sentence: " + " ".join(sentence), 95)
+            sentence_line = fit_text_from_end("Sentence: " + " ".join(sentence), 105)
 
-            cv2.rectangle(image, (0, 0), (1600, 50), (50, 50, 50), -1)
-            cv2.putText(image, output_line, (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,255,255), 2, cv2.LINE_AA)
+            cv2.rectangle(image, (0, 0), (2000, 60), (40, 40, 40), -1)
+            cv2.putText(image, output_line, (20, 42), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255,255,255), 2, cv2.LINE_AA)
 
-            cv2.rectangle(image, (0, 50), (1600, 95), (30, 30, 30), -1)
-            cv2.putText(image, sentence_line, (10, 82), cv2.FONT_HERSHEY_SIMPLEX, 0.72, (255,255,255), 2, cv2.LINE_AA)
+            cv2.rectangle(image, (0, 60), (2000, 115), (20, 20, 20), -1)
+            cv2.putText(image, sentence_line, (20, 98), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (255,255,255), 2, cv2.LINE_AA)
 
             cv2.imshow("Hybrid ASL Realtime", image)
 
             key = cv2.waitKey(10) & 0xFF
+
             if key == ord('q'):
                 break
+
             if key == ord('c'):
                 sentence = []
                 accepted_text = "Waiting..."
@@ -285,4 +247,4 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main() 
+    main()

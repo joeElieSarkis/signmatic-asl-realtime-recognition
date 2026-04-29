@@ -32,21 +32,27 @@ CLASSES = [
     'Lebanese',
     'International',
     'University',
+    'Teacher',
+    'Happy',
+    'Like',
+    'Want',
+    'Deaf',
+    'School',
     'Idle'
 ]
 
 SEQUENCES_PER_CLASS = {
-    'Nice': 330,  ##Thery 50 each
-    'Eat': 250,  ##
-    'Yes': 330,  ##
-    'No': 350, ## 
-    'Water': 350,   ##
-    'Help': 250,  ##
-    'Hello': 270,   ##   
-    'Fine': 290,    ##  
-    'Good': 290,    ##
-    'Please': 270,   ##  
-    'Give': 290,   #...
+    'Nice': 330,  
+    'Eat': 250,  
+    'Yes': 330,  
+    'No': 350, 
+    'Water': 350,   
+    'Help': 250,  
+    'Hello': 270,    
+    'Fine': 290,     
+    'Good': 290,    
+    'Please': 270,   
+    'Give': 290,   
     'We': 340,
     'A': 340,
     'Have': 250,
@@ -61,6 +67,12 @@ SEQUENCES_PER_CLASS = {
     'Lebanese': 290,
     'International': 290,
     'University': 270,
+    'Teacher': 220,
+    'Happy': 220,
+    'Like': 220,
+    'Want': 220,
+    'Deaf': 220,
+    'School': 220,
     'Idle': 300
 }
 
@@ -114,13 +126,20 @@ def extract_keypoints(results):
 def get_next_sequence_index(class_dir):
     if not os.path.exists(class_dir):
         return 0
-    existing = [d for d in os.listdir(class_dir) if os.path.isdir(os.path.join(class_dir, d)) and d.isdigit()]
+
+    existing = [
+        d for d in os.listdir(class_dir)
+        if os.path.isdir(os.path.join(class_dir, d)) and d.isdigit()
+    ]
+
     if not existing:
         return 0
+
     return max(int(x) for x in existing) + 1
 
 def ensure_dirs():
     os.makedirs(DATA_DIR, exist_ok=True)
+
     for cls in CLASSES:
         os.makedirs(os.path.join(DATA_DIR, cls), exist_ok=True)
 
@@ -128,6 +147,7 @@ def main():
     ensure_dirs()
 
     cap = cv2.VideoCapture(0)
+
     if not cap.isOpened():
         print("Could not open camera.")
         return
@@ -147,6 +167,7 @@ def main():
 
                 for frame_num in range(SEQUENCE_LENGTH):
                     ret, frame = cap.read()
+
                     if not ret:
                         print("Camera read failed.")
                         cap.release()
@@ -161,13 +182,16 @@ def main():
                         cv2.putText(image, f'SEQUENCE: {seq_idx + 1}/{target_total}', (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
                         cv2.putText(image, 'GET READY', (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
                         cv2.imshow('Custom Data Collection', image)
+
                         key = cv2.waitKey(1200)
+
                         if key & 0xFF == ord('q'):
                             cap.release()
                             cv2.destroyAllWindows()
                             return
 
                     ret, frame = cap.read()
+
                     if not ret:
                         print("Camera read failed.")
                         cap.release()
@@ -186,6 +210,7 @@ def main():
                     cv2.imshow('Custom Data Collection', image)
 
                     key = cv2.waitKey(1)
+
                     if key & 0xFF == ord('q'):
                         cap.release()
                         cv2.destroyAllWindows()

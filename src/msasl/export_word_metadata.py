@@ -30,7 +30,13 @@ TARGET_WORDS = {
     'live': 'Live',
     'love': 'Love',
     'university': 'University',
-    'thanks': 'Thanks'
+    'thanks': 'Thanks',
+    'teacher': 'Teacher',
+    'happy': 'Happy',
+    'like': 'Like',
+    'want': 'Want',
+    'deaf': 'Deaf',
+    'school': 'School'
 }
 
 def load_json(path):
@@ -38,6 +44,7 @@ def load_json(path):
         return json.load(f)
 
 all_items = []
+
 for split_name, path in [('train', TRAIN_JSON), ('val', VAL_JSON), ('test', TEST_JSON)]:
     data = load_json(path)
     for item in data:
@@ -49,6 +56,7 @@ for split_name, path in [('train', TRAIN_JSON), ('val', VAL_JSON), ('test', TEST
             all_items.append(out)
 
 out_path = os.path.join(OUT_DIR, 'selected_words_metadata.json')
+
 with open(out_path, 'w', encoding='utf-8') as f:
     json.dump(all_items, f, indent=2)
 

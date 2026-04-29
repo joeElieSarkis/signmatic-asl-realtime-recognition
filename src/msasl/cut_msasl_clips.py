@@ -29,10 +29,17 @@ TARGET_WORDS = {
     'live': 'Live',
     'love': 'Love',
     'university': 'University',
-    'thanks': 'Thanks'
+    'thanks': 'Thanks',
+    'teacher': 'Teacher',
+    'happy': 'Happy',
+    'like': 'Like',
+    'want': 'Want',
+    'deaf': 'Deaf',
+    'school': 'School'
 }
 
 os.makedirs(OUT_DIR, exist_ok=True)
+
 for label in TARGET_WORDS.values():
     os.makedirs(os.path.join(OUT_DIR, label), exist_ok=True)
 
@@ -61,11 +68,13 @@ skipped = 0
 
 for idx, item in enumerate(data):
     word = item['text'].strip().lower()
+
     if word not in TARGET_WORDS:
         continue
 
     video_id = get_youtube_id(item['url'])
     src = find_video_file(video_id)
+
     if src is None:
         skipped += 1
         continue
@@ -76,6 +85,7 @@ for idx, item in enumerate(data):
 
     cap = cv2.VideoCapture(src)
     fps = cap.get(cv2.CAP_PROP_FPS)
+
     if fps <= 0:
         cap.release()
         skipped += 1

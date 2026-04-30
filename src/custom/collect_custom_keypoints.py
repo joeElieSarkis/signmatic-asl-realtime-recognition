@@ -16,7 +16,7 @@ CLASSES = [
     'Hello',
     'Fine',
     'Good',
-    'Please',
+    'Please', ###  tfakera like 
     'Give',
     'We',
     'A',
@@ -33,11 +33,17 @@ CLASSES = [
     'International',
     'University',
     'Teacher',
-    'Happy',
-    'Like',
+    'Happy',   ### am yfakera nice
+    'Like', 
     'Want',
     'Deaf',
     'School',
+    'What',
+    'Need',
+    'Friend',
+    'Learn',
+    'Book',
+    'Computer',
     'Idle'
 ]
 
@@ -51,7 +57,7 @@ SEQUENCES_PER_CLASS = {
     'Hello': 270,    
     'Fine': 290,     
     'Good': 290,    
-    'Please': 270,   
+    'Please': 310,   
     'Give': 290,   
     'We': 340,
     'A': 340,
@@ -68,11 +74,17 @@ SEQUENCES_PER_CLASS = {
     'International': 290,
     'University': 270,
     'Teacher': 220,
-    'Happy': 220,
+    'Happy': 260,
     'Like': 220,
     'Want': 220,
     'Deaf': 220,
     'School': 220,
+    'What': 220,
+    'Need': 220,
+    'Friend': 220,
+    'Learn': 220,
+    'Book': 220,
+    'Computer': 220,
     'Idle': 300
 }
 

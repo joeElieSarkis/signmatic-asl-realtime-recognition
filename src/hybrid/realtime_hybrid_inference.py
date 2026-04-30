@@ -7,40 +7,14 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_31words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_37words_idle.h5')
 
 CLASSES = [
-    'Nice',
-    'Eat',
-    'Yes',
-    'No',
-    'Water',
-    'Help',
-    'Hello',
-    'Fine',
-    'Good',
-    'Please',
-    'Give',
-    'We',
-    'A',
-    'Have',
-    'Work',
-    'So',
-    'Hard',
-    'Live',
-    'Love',
-    'Thanks',
-    'High',
-    'Grade',
-    'Lebanese',
-    'International',
-    'University',
-    'Teacher',
-    'Happy',
-    'Like',
-    'Want',
-    'Deaf',
-    'School',
+    'Nice', 'Eat', 'Yes', 'No', 'Water', 'Help', 'Hello', 'Fine', 'Good', 'Please',
+    'Give', 'We', 'A', 'Have', 'Work', 'So', 'Hard', 'Live', 'Love', 'Thanks',
+    'High', 'Grade', 'Lebanese', 'International', 'University',
+    'Teacher', 'Happy', 'Like', 'Want', 'Deaf', 'School',
+    'What', 'Need', 'Friend', 'Learn', 'Book', 'Computer',
     'Idle'
 ]
 
@@ -50,7 +24,10 @@ STABLE_FRAMES = 5
 COOLDOWN_FRAMES = 12
 DISPLAY_HOLD_FRAMES = 30
 RECENT_HANDS_FRAMES = 8
-MAX_SENTENCE_WORDS = 100
+DISPLAY_SENTENCE_WORDS = 10
+
+WINDOW_W = 1100
+WINDOW_H = 720
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
@@ -62,12 +39,10 @@ def speak_text_windows(text):
         return
 
     spoken_text = text
-
     if text == 'Live':
         spoken_text = 'liv'
 
     safe_text = spoken_text.replace("'", "''")
-
     ps_command = (
         "Add-Type -AssemblyName System.Speech;"
         "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
@@ -125,11 +100,6 @@ def extract_keypoints(results):
 def hands_present(results):
     return (results.left_hand_landmarks is not None) or (results.right_hand_landmarks is not None)
 
-def fit_text_from_end(text, max_chars):
-    if len(text) <= max_chars:
-        return text
-    return text[-max_chars:]
-
 def context_word(raw_word, sentence):
     prev_word = sentence[-1] if sentence else None
 
@@ -140,6 +110,39 @@ def context_word(raw_word, sentence):
         return 'Worked'
 
     return raw_word
+
+def sentence_line(sentence):
+    visible = sentence[-DISPLAY_SENTENCE_WORDS:]
+    return "Sentence: " + " ".join(visible)
+
+def make_display(frame, accepted_text, sentence):
+    frame = cv2.resize(frame, (WINDOW_W, WINDOW_H))
+
+    cv2.rectangle(frame, (0, 0), (WINDOW_W, 70), (50, 50, 50), -1)
+    cv2.putText(
+        frame,
+        f"Output: {accepted_text}",
+        (25, 48),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1.2,
+        (255,255,255),
+        2,
+        cv2.LINE_AA
+    )
+
+    cv2.rectangle(frame, (0, WINDOW_H - 80), (WINDOW_W, WINDOW_H), (30, 30, 30), -1)
+    cv2.putText(
+        frame,
+        sentence_line(sentence),
+        (25, WINDOW_H - 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.85,
+        (255,255,255),
+        2,
+        cv2.LINE_AA
+    )
+
+    return frame
 
 def main():
     global last_spoken_text
@@ -162,7 +165,7 @@ def main():
         return
 
     cv2.namedWindow("Hybrid ASL Realtime", cv2.WINDOW_NORMAL)
-    cv2.setWindowProperty("Hybrid ASL Realtime", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    cv2.resizeWindow("Hybrid ASL Realtime", WINDOW_W, WINDOW_H)
 
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while cap.isOpened():
@@ -206,9 +209,6 @@ def main():
                         accepted_text = final_word
                         sentence.append(final_word)
 
-                        if len(sentence) > MAX_SENTENCE_WORDS:
-                            sentence = sentence[-MAX_SENTENCE_WORDS:]
-
                         display_hold = DISPLAY_HOLD_FRAMES
                         cooldown = COOLDOWN_FRAMES
                         sequence.clear()
@@ -222,16 +222,8 @@ def main():
                 if not any(recent_hands):
                     pred_history.clear()
 
-            output_line = fit_text_from_end(f"Output: {accepted_text}", 55)
-            sentence_line = fit_text_from_end("Sentence: " + " ".join(sentence), 105)
-
-            cv2.rectangle(image, (0, 0), (2000, 60), (40, 40, 40), -1)
-            cv2.putText(image, output_line, (20, 42), cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255,255,255), 2, cv2.LINE_AA)
-
-            cv2.rectangle(image, (0, 60), (2000, 115), (20, 20, 20), -1)
-            cv2.putText(image, sentence_line, (20, 98), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (255,255,255), 2, cv2.LINE_AA)
-
-            cv2.imshow("Hybrid ASL Realtime", image)
+            display = make_display(image, accepted_text, sentence)
+            cv2.imshow("Hybrid ASL Realtime", display)
 
             key = cv2.waitKey(10) & 0xFF
 

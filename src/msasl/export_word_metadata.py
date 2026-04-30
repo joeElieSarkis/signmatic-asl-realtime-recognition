@@ -36,7 +36,13 @@ TARGET_WORDS = {
     'like': 'Like',
     'want': 'Want',
     'deaf': 'Deaf',
-    'school': 'School'
+    'school': 'School',
+    'what': 'What',
+    'need': 'Need',
+    'friend': 'Friend',
+    'learn': 'Learn',
+    'book': 'Book',
+    'computer': 'Computer'
 }
 
 def load_json(path):

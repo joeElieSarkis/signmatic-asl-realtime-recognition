@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_37words_idle.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_43words_idle.h5')
 
 CLASSES = [
     'Nice', 'Eat', 'Yes', 'No', 'Water', 'Help', 'Hello', 'Fine', 'Good', 'Please',
@@ -15,6 +15,7 @@ CLASSES = [
     'High', 'Grade', 'Lebanese', 'International', 'University',
     'Teacher', 'Happy', 'Like', 'Want', 'Deaf', 'School',
     'What', 'Need', 'Friend', 'Learn', 'Book', 'Computer',
+    'Again', 'Father', 'Mother', 'Where', 'Forget', 'Nothing',
     'Idle'
 ]
 
@@ -24,10 +25,10 @@ STABLE_FRAMES = 5
 COOLDOWN_FRAMES = 12
 DISPLAY_HOLD_FRAMES = 30
 RECENT_HANDS_FRAMES = 8
-DISPLAY_SENTENCE_WORDS = 10
+DISPLAY_SENTENCE_WORDS = 8
 
-WINDOW_W = 1100
-WINDOW_H = 720
+WINDOW_W = 800
+WINDOW_H = 600
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
@@ -118,29 +119,11 @@ def sentence_line(sentence):
 def make_display(frame, accepted_text, sentence):
     frame = cv2.resize(frame, (WINDOW_W, WINDOW_H))
 
-    cv2.rectangle(frame, (0, 0), (WINDOW_W, 70), (50, 50, 50), -1)
-    cv2.putText(
-        frame,
-        f"Output: {accepted_text}",
-        (25, 48),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1.2,
-        (255,255,255),
-        2,
-        cv2.LINE_AA
-    )
+    cv2.rectangle(frame, (0, 0), (WINDOW_W, 60), (50, 50, 50), -1)
+    cv2.putText(frame, f"Output: {accepted_text}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,255,255), 2, cv2.LINE_AA)
 
-    cv2.rectangle(frame, (0, WINDOW_H - 80), (WINDOW_W, WINDOW_H), (30, 30, 30), -1)
-    cv2.putText(
-        frame,
-        sentence_line(sentence),
-        (25, WINDOW_H - 30),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.85,
-        (255,255,255),
-        2,
-        cv2.LINE_AA
-    )
+    cv2.rectangle(frame, (0, WINDOW_H - 65), (WINDOW_W, WINDOW_H), (30, 30, 30), -1)
+    cv2.putText(frame, sentence_line(sentence), (20, WINDOW_H - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2, cv2.LINE_AA)
 
     return frame
 

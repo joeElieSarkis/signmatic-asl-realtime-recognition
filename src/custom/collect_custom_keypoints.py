@@ -13,6 +13,7 @@ CLASSES = [
     'Teacher', 'Happy', 'Like', 'Want', 'Deaf', 'School',
     'What', 'Need', 'Friend', 'Learn', 'Book', 'Computer',
     'Again', 'Father', 'Mother', 'Where', 'Forget', 'Nothing',
+    'I', 'You', 'And', 'My', 'Name', 'Is', 'ILoveYou',
     'Idle'
 ]
 
@@ -60,6 +61,13 @@ SEQUENCES_PER_CLASS = {
     'Where': 220,
     'Forget': 220,
     'Nothing': 220,
+    'I': 260,
+    'You': 220,
+    'And': 260,
+    'My': 240,
+    'Name': 220,
+    'Is': 280,
+    'ILoveYou': 260,
     'Idle': 300
 }
 

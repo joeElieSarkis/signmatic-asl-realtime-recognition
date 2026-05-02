@@ -48,8 +48,17 @@ TARGET_WORDS = {
     'mother': 'Mother',
     'where': 'Where',
     'forget': 'Forget',
-    'nothing': 'Nothing'
+    'nothing': 'Nothing',
+    'i': 'I',
+    'you': 'You',
+    'and': 'And',
+    'my': 'My',
+    'name': 'Name',
+    'iloveyou': 'ILoveYou'
 }
+
+def normalize_word(text):
+    return text.strip().lower().replace(' ', '').replace('-', '').replace('_', '')
 
 def load_json(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -60,7 +69,7 @@ all_items = []
 for split_name, path in [('train', TRAIN_JSON), ('val', VAL_JSON), ('test', TEST_JSON)]:
     data = load_json(path)
     for item in data:
-        word = item['text'].strip().lower()
+        word = normalize_word(item['text'])
         if word in TARGET_WORDS:
             out = dict(item)
             out['split_name'] = split_name

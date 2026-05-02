@@ -47,13 +47,22 @@ TARGET_WORDS = {
     'mother': 'Mother',
     'where': 'Where',
     'forget': 'Forget',
-    'nothing': 'Nothing'
+    'nothing': 'Nothing',
+    'i': 'I',
+    'you': 'You',
+    'and': 'And',
+    'my': 'My',
+    'name': 'Name',
+    'iloveyou': 'ILoveYou'
 }
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
 for label in TARGET_WORDS.values():
     os.makedirs(os.path.join(OUT_DIR, label), exist_ok=True)
+
+def normalize_word(text):
+    return text.strip().lower().replace(' ', '').replace('-', '').replace('_', '')
 
 def get_youtube_id(url):
     if 'youtube.com' in url:
@@ -79,7 +88,7 @@ saved = 0
 skipped = 0
 
 for idx, item in enumerate(data):
-    word = item['text'].strip().lower()
+    word = normalize_word(item['text'])
 
     if word not in TARGET_WORDS:
         continue

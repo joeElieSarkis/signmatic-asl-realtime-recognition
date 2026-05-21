@@ -7,8 +7,9 @@ from tensorflow.keras.utils import to_categorical
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 CUSTOM_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints')
+AUG_CUSTOM_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints_augmented')
 MSASL_DIR = os.path.join(PROJECT_ROOT, 'data', 'MSASL', 'MSASL_keypoints')
-OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_generalized')
+OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_augmented')
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -38,13 +39,13 @@ SEQ_LEN = 30
 FEATURE_DIM = 258
 
 CUSTOM_LIMIT_PER_WORD = None
+AUG_LIMIT_PER_WORD = None
 MSASL_LIMIT_PER_WORD = None
 IDLE_LIMIT = None
 
 label_map = {label: i for i, label in enumerate(CLASSES)}
 
-def load_custom_sequences(label):
-    label_dir = os.path.join(CUSTOM_DIR, label)
+def load_fixed_length_sequences_from_folder(label_dir):
     samples = []
 
     if not os.path.isdir(label_dir):
@@ -79,6 +80,12 @@ def load_custom_sequences(label):
             samples.append(np.array(frames, dtype=np.float32))
 
     return samples
+
+def load_custom_sequences(label):
+    return load_fixed_length_sequences_from_folder(os.path.join(CUSTOM_DIR, label))
+
+def load_augmented_sequences(label):
+    return load_fixed_length_sequences_from_folder(os.path.join(AUG_CUSTOM_DIR, label))
 
 def fix_sequence_length(seq, target_len=30):
     if len(seq) == 0:
@@ -119,10 +126,11 @@ def load_msasl_sequences(label):
 
 X = []
 y = []
-source_counts = defaultdict(lambda: {'custom': 0, 'msasl': 0})
+source_counts = defaultdict(lambda: {'custom': 0, 'augmented': 0, 'msasl': 0})
 
 for label in WORDS:
     custom_samples = load_custom_sequences(label)
+    augmented_samples = load_augmented_sequences(label)
 
     msasl_samples = []
     if label in MSASL_WORDS:
@@ -130,6 +138,9 @@ for label in WORDS:
 
     if CUSTOM_LIMIT_PER_WORD is not None:
         custom_samples = custom_samples[:CUSTOM_LIMIT_PER_WORD]
+
+    if AUG_LIMIT_PER_WORD is not None:
+        augmented_samples = augmented_samples[:AUG_LIMIT_PER_WORD]
 
     if MSASL_LIMIT_PER_WORD is not None:
         msasl_samples = msasl_samples[:MSASL_LIMIT_PER_WORD]
@@ -139,12 +150,18 @@ for label in WORDS:
         y.append(label_map[label])
         source_counts[label]['custom'] += 1
 
+    for seq in augmented_samples:
+        X.append(seq)
+        y.append(label_map[label])
+        source_counts[label]['augmented'] += 1
+
     for seq in msasl_samples:
         X.append(seq)
         y.append(label_map[label])
         source_counts[label]['msasl'] += 1
 
 idle_samples = load_custom_sequences('Idle')
+idle_augmented = load_augmented_sequences('Idle')
 
 if IDLE_LIMIT is not None:
     idle_samples = idle_samples[:IDLE_LIMIT]
@@ -153,6 +170,11 @@ for seq in idle_samples:
     X.append(seq)
     y.append(label_map['Idle'])
     source_counts['Idle']['custom'] += 1
+
+for seq in idle_augmented:
+    X.append(seq)
+    y.append(label_map['Idle'])
+    source_counts['Idle']['augmented'] += 1
 
 X = np.array(X, dtype=np.float32)
 y = np.array(y, dtype=np.int32)
@@ -183,7 +205,7 @@ with open(os.path.join(OUT_DIR, 'labels.txt'), 'w', encoding='utf-8') as f:
     for label in CLASSES:
         f.write(label + '\n')
 
-print("Hybrid 50-word dataset built.")
+print("Hybrid 50-word augmented dataset built.")
 print("X_train:", X_train.shape)
 print("X_val  :", X_val.shape)
 print("X_test :", X_test.shape)
@@ -191,4 +213,5 @@ print("X_test :", X_test.shape)
 print("\nPer-class source counts:")
 for label in CLASSES:
     c = source_counts[label]
-    print(f"{label:14s} custom={c['custom']:4d} msasl={c['msasl']:4d} total={c['custom'] + c['msasl']:4d}")
+    total = c['custom'] + c['augmented'] + c['msasl']
+    print(f"{label:14s} custom={c['custom']:4d} augmented={c['augmented']:4d} msasl={c['msasl']:4d} total={total:4d}")

@@ -7,7 +7,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_50words_idle_generalized.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_50words_augmented.h5')
 
 CLASSES = [
     'Nice', 'Eat', 'Yes', 'No', 'Water', 'Help', 'Hello', 'Fine', 'Good', 'Please',
@@ -41,12 +41,15 @@ def speak_text_windows(text):
         return
 
     spoken_text = text
+
     if text == 'Live':
         spoken_text = 'liv'
+
     if text == 'ILoveYou':
         spoken_text = 'I love you'
 
     safe_text = spoken_text.replace("'", "''")
+
     ps_command = (
         "Add-Type -AssemblyName System.Speech;"
         "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
@@ -123,10 +126,28 @@ def make_display(frame, accepted_text, sentence):
     frame = cv2.resize(frame, (WINDOW_W, WINDOW_H))
 
     cv2.rectangle(frame, (0, 0), (WINDOW_W, 60), (50, 50, 50), -1)
-    cv2.putText(frame, f"Output: {accepted_text}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,255,255), 2, cv2.LINE_AA)
+    cv2.putText(
+        frame,
+        f"Output: {accepted_text}",
+        (20, 40),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.9,
+        (255,255,255),
+        2,
+        cv2.LINE_AA
+    )
 
     cv2.rectangle(frame, (0, WINDOW_H - 65), (WINDOW_W, WINDOW_H), (30, 30, 30), -1)
-    cv2.putText(frame, sentence_line(sentence), (20, WINDOW_H - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2, cv2.LINE_AA)
+    cv2.putText(
+        frame,
+        sentence_line(sentence),
+        (20, WINDOW_H - 25),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.7,
+        (255,255,255),
+        2,
+        cv2.LINE_AA
+    )
 
     return frame
 

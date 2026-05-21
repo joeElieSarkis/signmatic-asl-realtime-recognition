@@ -2,12 +2,12 @@ import os
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
+from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_generalized')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_augmented')
 MODELS_DIR = os.path.join(PROJECT_ROOT, 'models')
-LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'hybrid_50_generalized')
+LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'hybrid_50_augmented')
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -41,16 +41,23 @@ model.compile(
 callbacks = [
     TensorBoard(log_dir=LOGS_DIR),
     ModelCheckpoint(
-        os.path.join(MODELS_DIR, 'best_hybrid_model_50words_idle_generalized.h5'),
+        os.path.join(MODELS_DIR, 'best_hybrid_model_50words_augmented.h5'),
         monitor='val_categorical_accuracy',
         save_best_only=True,
         mode='max',
+        verbose=1
+    ),
+    EarlyStopping(
+        monitor='val_loss',
+        patience=25,
+        restore_best_weights=True,
         verbose=1
     )
 ]
 
 model.fit(
-    X_train, y_train,
+    X_train,
+    y_train,
     validation_data=(X_val, y_val),
     epochs=150,
     batch_size=16,
@@ -61,4 +68,4 @@ test_loss, test_acc = model.evaluate(X_test, y_test, verbose=1)
 
 print(f"Test loss: {test_loss:.4f}")
 print(f"Test accuracy: {test_acc:.4f}")
-print("Best hybrid 50-word model already saved.")
+print("Best augmented hybrid model already saved.")

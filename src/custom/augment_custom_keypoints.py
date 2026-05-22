@@ -25,13 +25,14 @@ FEATURE_DIM = 258
 DEFAULT_AUGMENT_RATIO = 0.10
 
 CLASS_AUGMENT_RATIO = {
-    'Fine': 0.15,
-    'Mother': 0.15,
-    'You': 0.15,
-    'So': 0.15,
+    'Yes': 0.15,
+    'No': 0.15,
+    'Fine': 0.20,
+    'Mother': 0.20,
+    'You': 0.20,
+    'So': 0.05,
     'I': 0.15,
-    'Eat': 0.15,
-    'ILoveYou': 0.15
+    'Eat': 0.15
 }
 
 POSE_OFFSET = 0

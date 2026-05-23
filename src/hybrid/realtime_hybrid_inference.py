@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 import numpy as np
 import mediapipe as mp
@@ -26,7 +27,7 @@ STABLE_FRAMES = 5
 COOLDOWN_FRAMES = 12
 DISPLAY_HOLD_FRAMES = 30
 RECENT_HANDS_FRAMES = 8
-DISPLAY_SENTENCE_WORDS = 8
+DISPLAY_SENTENCE_WORDS = 10
 
 WINDOW_W = 800
 WINDOW_H = 600
@@ -36,31 +37,109 @@ mp_drawing = mp.solutions.drawing_utils
 
 last_spoken_text = None
 
-def speak_text_windows(text):
+PAST_AFTER_HAVE = {
+    'Work': 'worked',
+    'Want': 'wanted',
+    'Need': 'needed',
+    'Learn': 'learned',
+    'Love': 'loved',
+    'Like': 'liked',
+    'Help': 'helped',
+    'Eat': 'eaten',
+    'Give': 'given',
+    'Forget': 'forgotten'
+}
+
+OBJECT_US_PREVIOUS = {
+    'Give',
+    'Help'
+}
+
+DISPLAY_WORDS = {
+    'Nice': 'nice',
+    'Eat': 'eat',
+    'Yes': 'yes',
+    'No': 'no',
+    'Water': 'water',
+    'Help': 'help',
+    'Hello': 'hello',
+    'Fine': 'fine',
+    'Good': 'good',
+    'Please': 'please',
+    'Give': 'give',
+    'We': 'we',
+    'A': 'A',
+    'Have': 'have',
+    'Work': 'work',
+    'So': 'so',
+    'Hard': 'hard',
+    'Live': 'live',
+    'Love': 'love',
+    'Thanks': 'thanks',
+    'High': 'high',
+    'Grade': 'grade',
+    'Lebanese': 'Lebanese',
+    'International': 'International',
+    'University': 'University',
+    'Teacher': 'teacher',
+    'Happy': 'happy',
+    'Like': 'like',
+    'Want': 'want',
+    'Deaf': 'deaf',
+    'School': 'school',
+    'What': 'what',
+    'Need': 'need',
+    'Friend': 'friend',
+    'Learn': 'learn',
+    'Book': 'book',
+    'Computer': 'computer',
+    'Again': 'again',
+    'Father': 'father',
+    'Mother': 'mother',
+    'Where': 'where',
+    'Forget': 'forget',
+    'Nothing': 'nothing',
+    'I': 'I',
+    'You': 'you',
+    'And': 'and',
+    'My': 'my',
+    'Name': 'name',
+    'Is': 'is',
+    'ILoveYou': 'I love you',
+    'Idle': ''
+}
+
+def speech_word(display_text):
+    if display_text == 'live':
+        return 'liv'
+
+    return display_text
+
+def speak_text(text):
     if not text:
         return
 
-    spoken_text = text
-
-    if text == 'Live':
-        spoken_text = 'liv'
-
-    if text == 'ILoveYou':
-        spoken_text = 'I love you'
-
+    spoken_text = speech_word(text)
     safe_text = spoken_text.replace("'", "''")
 
-    ps_command = (
-        "Add-Type -AssemblyName System.Speech;"
-        "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
-        f"$speak.Speak('{safe_text}')"
-    )
+    if sys.platform.startswith('win'):
+        ps_command = (
+            "Add-Type -AssemblyName System.Speech;"
+            "$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
+            f"$speak.Speak('{safe_text}')"
+        )
 
-    subprocess.Popen(
-        ["powershell", "-Command", ps_command],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+        subprocess.Popen(
+            ["powershell", "-Command", ps_command],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    else:
+        subprocess.Popen(
+            ["espeak-ng", safe_text],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
 def mediapipe_detection(frame, model):
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -107,22 +186,34 @@ def extract_keypoints(results):
 def hands_present(results):
     return (results.left_hand_landmarks is not None) or (results.right_hand_landmarks is not None)
 
-def context_word(raw_word, sentence):
-    prev_word = sentence[-1] if sentence else None
+def apply_context(raw_word, raw_sentence):
+    previous_raw = raw_sentence[-1] if raw_sentence else None
 
-    if raw_word == 'We' and prev_word == 'Give':
-        return 'Us'
+    if raw_word == 'We' and previous_raw in OBJECT_US_PREVIOUS:
+        return 'us'
 
-    if raw_word == 'Work' and prev_word == 'Have':
-        return 'Worked'
+    if previous_raw == 'Have' and raw_word in PAST_AFTER_HAVE:
+        return PAST_AFTER_HAVE[raw_word]
 
-    return raw_word
+    return DISPLAY_WORDS.get(raw_word, raw_word.lower())
 
-def sentence_line(sentence):
-    visible = sentence[-DISPLAY_SENTENCE_WORDS:]
-    return "Sentence: " + " ".join(visible)
+def clean_sentence(words):
+    if not words:
+        return ''
 
-def make_display(frame, accepted_text, sentence):
+    text = ' '.join(words)
+    text = text.replace('I love you', 'I love you')
+
+    if len(text) > 0:
+        text = text[0].upper() + text[1:]
+
+    return text
+
+def sentence_line(sentence_words):
+    visible = sentence_words[-DISPLAY_SENTENCE_WORDS:]
+    return "Sentence: " + clean_sentence(visible)
+
+def make_display(frame, accepted_text, sentence_words):
     frame = cv2.resize(frame, (WINDOW_W, WINDOW_H))
 
     cv2.rectangle(frame, (0, 0), (WINDOW_W, 60), (50, 50, 50), -1)
@@ -140,7 +231,7 @@ def make_display(frame, accepted_text, sentence):
     cv2.rectangle(frame, (0, WINDOW_H - 65), (WINDOW_W, WINDOW_H), (30, 30, 30), -1)
     cv2.putText(
         frame,
-        sentence_line(sentence),
+        sentence_line(sentence_words),
         (20, WINDOW_H - 25),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.7,
@@ -161,7 +252,9 @@ def main():
     recent_hands = deque(maxlen=RECENT_HANDS_FRAMES)
 
     accepted_text = "Waiting..."
-    sentence = []
+    sentence_words = []
+    raw_sentence = []
+
     cooldown = 0
     display_hold = 0
 
@@ -212,9 +305,12 @@ def main():
 
                 if stable and cooldown == 0 and had_recent_hands and pred_conf >= CONF_THRESHOLD:
                     if pred_label != 'Idle':
-                        final_word = context_word(pred_label, sentence)
-                        accepted_text = final_word
-                        sentence.append(final_word)
+                        display_word = apply_context(pred_label, raw_sentence)
+
+                        raw_sentence.append(pred_label)
+                        sentence_words.append(display_word)
+
+                        accepted_text = display_word[0].upper() + display_word[1:] if display_word else ''
 
                         display_hold = DISPLAY_HOLD_FRAMES
                         cooldown = COOLDOWN_FRAMES
@@ -222,14 +318,14 @@ def main():
                         pred_history.clear()
                         recent_hands.clear()
 
-                        if final_word != last_spoken_text:
-                            speak_text_windows(final_word)
-                            last_spoken_text = final_word
+                        if display_word != last_spoken_text:
+                            speak_text(display_word)
+                            last_spoken_text = display_word
 
                 if not any(recent_hands):
                     pred_history.clear()
 
-            display = make_display(image, accepted_text, sentence)
+            display = make_display(image, accepted_text, sentence_words)
             cv2.imshow("Hybrid ASL Realtime", display)
 
             key = cv2.waitKey(10) & 0xFF
@@ -238,7 +334,8 @@ def main():
                 break
 
             if key == ord('c'):
-                sentence = []
+                sentence_words = []
+                raw_sentence = []
                 accepted_text = "Waiting..."
                 last_spoken_text = None
 

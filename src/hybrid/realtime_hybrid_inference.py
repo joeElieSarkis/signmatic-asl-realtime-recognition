@@ -8,7 +8,7 @@ from collections import deque
 from tensorflow.keras.models import load_model
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_transformer_model_50words_augmented_v2.h5')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'final_signmatic_transformer_50words.h5')
 
 CLASSES = [
     'Nice', 'Eat', 'Yes', 'No', 'Water', 'Help', 'Hello', 'Fine', 'Good', 'Please',
@@ -22,10 +22,10 @@ CLASSES = [
 ]
 
 SEQUENCE_LENGTH = 30
-CONF_THRESHOLD = 0.90
+CONF_THRESHOLD = 0.88
 STABLE_FRAMES = 5
-COOLDOWN_FRAMES = 12
-DISPLAY_HOLD_FRAMES = 30
+COOLDOWN_FRAMES = 6
+DISPLAY_HOLD_FRAMES = 18
 RECENT_HANDS_FRAMES = 8
 DISPLAY_SENTENCE_WORDS = 10
 

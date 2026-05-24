@@ -7,9 +7,9 @@ from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStoppi
 from tensorflow.keras.optimizers import Adam
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_augmented')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_augmented_v2')
 MODELS_DIR = os.path.join(PROJECT_ROOT, 'models')
-LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'transformer_50_augmented')
+LOGS_DIR = os.path.join(PROJECT_ROOT, 'outputs', 'logs', 'transformer_50_augmented_v2')
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -84,7 +84,7 @@ model.summary()
 callbacks = [
     TensorBoard(log_dir=LOGS_DIR),
     ModelCheckpoint(
-        os.path.join(MODELS_DIR, 'best_transformer_model_50words_augmented.h5'),
+        os.path.join(MODELS_DIR, 'best_transformer_model_50words_augmented_v2.h5'),
         monitor='val_categorical_accuracy',
         save_best_only=True,
         mode='max',

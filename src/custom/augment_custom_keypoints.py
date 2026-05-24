@@ -6,7 +6,7 @@ import numpy as np
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 IN_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints')
-OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints_augmented')
+OUT_DIR = os.path.join(PROJECT_ROOT, 'data', 'Custom', 'custom_keypoints_augmented_v2')
 
 CLASSES = [
     'Nice', 'Eat', 'Yes', 'No', 'Water', 'Help', 'Hello', 'Fine', 'Good', 'Please',
@@ -26,9 +26,9 @@ DEFAULT_AUGMENT_RATIO = 0.10
 
 CLASS_AUGMENT_RATIO = {
     'Yes': 0.15,
-    'No': 0.15,
+    'No': 0.20,
     'Fine': 0.20,
-    'Mother': 0.20,
+    'Mother': 0.25,
     'You': 0.20,
     'So': 0.05,
     'I': 0.15,

@@ -1,0 +1,10 @@
+numpy
+opencv-python
+mediapipe
+PyQt5
+onnxruntime
+piper-tts
+
+# Installed through JetPack / NVIDIA packages on the Jetson:
+# tensorrt
+# pycuda

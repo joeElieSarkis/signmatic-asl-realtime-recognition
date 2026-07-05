@@ -111,4 +111,7 @@ test_loss, test_acc = model.evaluate(X_test, y_test, verbose=1)
 
 print(f"Transformer test loss: {test_loss:.4f}")
 print(f"Transformer test accuracy: {test_acc:.4f}")
+final_model_path = os.path.join(MODELS_DIR, 'final_signmatic_transformer_50words.h5')
+model.save(final_model_path)
+print(f"Saved final transformer model to: {final_model_path}")
 print("Best transformer model already saved.")

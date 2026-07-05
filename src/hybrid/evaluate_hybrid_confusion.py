@@ -6,8 +6,8 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_generalized')
-MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'best_hybrid_model_50words_idle_generalized.h5')
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'Hybrid', 'processed_hybrid_50_augmented_v2')
+MODEL_PATH = os.path.join(PROJECT_ROOT, 'models', 'final_signmatic_transformer_50words.h5')
 
 LABELS_PATH = os.path.join(DATA_DIR, 'labels.txt')
 

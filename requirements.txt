@@ -4,3 +4,5 @@ mediapipe
 scikit-learn
 matplotlib
 numpy
+tf2onnx
+onnxruntime

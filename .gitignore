@@ -1,10 +1,59 @@
-.venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local configuration
+.env
+.env.*
+
+# Jupyter / IDE / OS
 .ipynb_checkpoints/
-*.npy
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local datasets and generated experiment data
 data/
-models/
 outputs/
 Logs/
+runs/
+*.npy
+*.npz
+*.csv.tmp
+
+# Model artifacts and deployment binaries
+models/
 *.h5
+*.keras
+*.onnx
+*.trt
+*.engine
+*.tflite
+*.pb
+*.ckpt*
+
+# Audio, voice, and video assets
+voices/
+piper-voices*/
+!jetson/voices/
+!jetson/voices/.gitkeep
+*.wav
+*.mp3
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Local scratch visualizations
+visualkeras_model.png
+src/hybrid/visualize_neural_network

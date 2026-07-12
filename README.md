@@ -33,9 +33,10 @@ SignMatic is a real-time American Sign Language (ASL) recognition and translatio
 
 ```text
 src/
-  custom/      Custom data collection, custom-only training, and custom augmentation.
+  custom/      Custom keypoint collection, contributor sequence merge, and synthetic augmentation.
   msasl/       MS-ASL metadata filtering, video download, clip cutting, and keypoint extraction.
   hybrid/      Final hybrid dataset building, Transformer training, evaluation, ONNX export, and laptop inference.
+archive/legacy_lstm/  Earlier LSTM baselines preserved for research traceability; not used by the final deployment.
 jetson/        Jetson deployment scripts for the welcome screen and real-time kiosk interface.
 data/          Local datasets and processed arrays. Ignored by Git.
 models/        Local trained models and exported ONNX/TensorRT engines. Ignored by Git.

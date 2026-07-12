@@ -2,6 +2,22 @@
 
 SignMatic is a real-time American Sign Language (ASL) recognition and translation system. It extracts pose and hand landmarks with MediaPipe, classifies 30-frame landmark sequences with a Transformer encoder, and displays recognized words as text with speech output. The final system supports 50 ASL words plus an Idle class and was deployed on a Jetson Orin Nano-based touchscreen station.
 
+## Project Preview
+
+### Embedded Prototype
+
+| Startup screen | Live recognition |
+| --- | --- |
+| <img src="docs/images/signmatic_robot_start.jpg" alt="SignMatic embedded station showing the startup screen" width="420"> | <img src="docs/images/signmatic_robot_live.jpg" alt="SignMatic embedded station running live recognition" width="420"> |
+
+### Touchscreen Interface
+
+<img src="docs/images/signmatic_gui_welcome.jpg" alt="SignMatic Jetson welcome interface" width="650">
+
+### Hardware Integration
+
+<img src="docs/images/signmatic_hardware_internals_labeled.jpg" alt="Labeled internal hardware layout of the SignMatic embedded station" width="650">
+
 ## Main Features
 
 - Real-time skeleton-based ASL word recognition from webcam or camera-module input.

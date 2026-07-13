@@ -1,107 +1,193 @@
-# SignMatic: Real-Time Skeleton-Based ASL Recognition
+# SignMatic: Real-Time Skeleton-Based ASL Recognition and Translation
 
-SignMatic is a real-time American Sign Language (ASL) recognition and translation system. It extracts pose and hand landmarks with MediaPipe, classifies 30-frame landmark sequences with a Transformer encoder, and displays recognized words as text with speech output. The final system supports 50 ASL words plus an Idle class and was deployed on a Jetson Orin Nano-based touchscreen station.
+SignMatic is a real-time American Sign Language (ASL) word-recognition and translation system. It extracts pose and hand landmarks with MediaPipe Holistic, classifies 30-frame keypoint sequences using a Transformer encoder, and presents accepted words through English or Arabic text and offline speech.
+
+The final system recognizes 50 ASL words plus an `Idle` class and runs on a Jetson Orin Nano 8GB touchscreen station.
 
 ## Project Preview
 
-### Embedded Prototype
+### Embedded Station
 
 | Startup screen | Live recognition |
 | --- | --- |
-| <img src="docs/images/signmatic_robot_start.jpg" alt="SignMatic embedded station showing the startup screen" width="420"> | <img src="docs/images/signmatic_robot_live.jpg" alt="SignMatic embedded station running live recognition" width="420"> |
+| <img src="docs/images/signmatic_robot_start.jpg" alt="SignMatic embedded station displaying the startup screen" width="400"> | <img src="docs/images/signmatic_robot_live.jpg" alt="SignMatic embedded station performing live ASL recognition" width="400"> |
 
 ### Touchscreen Interface
 
-<img src="docs/images/signmatic_gui_welcome.jpg" alt="SignMatic Jetson welcome interface" width="650">
+<p align="center">
+  <img src="docs/images/signmatic_gui_welcome.jpg" alt="SignMatic Jetson welcome interface" width="700">
+</p>
 
 ### Hardware Integration
 
-<img src="docs/images/signmatic_hardware_internals_labeled.jpg" alt="Labeled internal hardware layout of the SignMatic embedded station" width="650">
+<p align="center">
+  <img src="docs/images/signmatic_hardware_internals_labeled.jpg" alt="Labeled internal hardware layout of the SignMatic embedded station" width="620">
+</p>
+
+## System Overview
+
+```text
+Camera input
+    -> MediaPipe pose and hand landmarks
+    -> 30-frame x 258-feature sequence
+    -> Transformer encoder
+    -> real-time acceptance checks
+    -> English/Arabic text and offline speech
+```
+
+Face landmarks may be visualized by the interface, but they are not included in the model input. The classifier uses pose, left-hand, and right-hand landmarks only.
 
 ## Main Features
 
-- Real-time skeleton-based ASL word recognition from webcam or camera-module input.
-- MediaPipe Holistic landmark extraction using pose, left hand, and right hand keypoints.
-- 30-frame temporal input sequence with 258 numerical features per frame.
-- Transformer encoder model with two encoder blocks, multi-head self-attention, residual connections, layer normalization, dense classification layers, and a 51-class softmax output.
-- Hybrid training data built from custom recorded keypoint sequences, MS-ASL clips, and synthetic augmentation applied to the custom keypoint sequences.
-- Real-time acceptance logic using confidence thresholding, stable repeated predictions, recent hand-presence checks, cooldown timing, and an Idle class.
-- ONNX export for embedded deployment and TensorRT execution on Jetson Orin Nano.
-- Jetson touchscreen interface with English and Arabic text output, selectable voice profiles, replay, clear sentence, volume control, theme switching, and offline speech synthesis.
+- Real-time isolated ASL word recognition from webcam or CSI camera input.
+- MediaPipe Holistic extraction of pose and both-hand landmarks.
+- Fixed 30-frame temporal sequences with 258 numerical features per frame.
+- Two-block Transformer encoder with multi-head self-attention.
+- Hybrid model-development dataset combining custom recordings, selected MS-ASL samples, and synthetic augmentation derived from custom keypoints.
+- A 51-class output containing 50 ASL words and an `Idle` class.
+- Real-time acceptance logic based on confidence, prediction stability, recent hand presence, cooldown timing, and Idle-state handling.
+- Context rules for sentence construction, including selected pronoun and verb-form transformations.
+- Keras-to-ONNX export followed by TensorRT deployment.
+- English and Arabic text output.
+- Offline Piper speech synthesis with selectable voice profiles.
+- Touchscreen controls for language, voice, volume, sentence clearing, replay, and theme selection.
+- Fully local inference and speech operation after the required device assets are installed.
 
 ## Repository Structure
 
 ```text
 src/
-  custom/      Custom keypoint collection, contributor sequence merge, and synthetic augmentation.
-  msasl/       MS-ASL metadata filtering, video download, clip cutting, and keypoint extraction.
-  hybrid/      Final hybrid dataset building, Transformer training, evaluation, ONNX export, and laptop inference.
-archive/legacy_lstm/  Earlier LSTM baselines preserved for research traceability; not used by the final deployment.
-jetson/        Jetson deployment scripts for the welcome screen and real-time kiosk interface.
+  custom/      Custom keypoint collection, contributor-data merging, and augmentation.
+  msasl/       MS-ASL filtering, downloading, clip preparation, and keypoint extraction.
+  hybrid/      Hybrid dataset construction, Transformer training, evaluation,
+               ONNX conversion, and laptop inference.
+
+archive/
+  legacy_lstm/ Earlier LSTM baselines retained for research traceability.
+
+jetson/        Jetson startup interface, TensorRT runtime, touchscreen interface,
+               and offline speech integration.
+
+docs/
+  images/      Images used by this README.
+
 data/          Local datasets and processed arrays. Ignored by Git.
-models/        Local trained models and exported ONNX/TensorRT engines. Ignored by Git.
-outputs/       Local logs, plots, and experiment outputs. Ignored by Git.
+models/        Local Keras, ONNX, and TensorRT model artifacts. Ignored by Git.
+outputs/       Local experiment logs, plots, and evaluation outputs. Ignored by Git.
 ```
 
-The repository tracks source code and deployment scripts. Large generated files such as datasets, videos, NumPy arrays, trained models, TensorRT engines, Piper voice models, and logs are intentionally not committed.
+The repository tracks source code, documentation, and deployment scripts. Large or generated artifacts such as datasets, videos, trained models, TensorRT engines, voice models, and experiment logs are intentionally excluded from Git.
 
 ## Dataset
 
-The final dataset release is available on Kaggle:
+The public dataset is available on Kaggle:
 
-https://www.kaggle.com/datasets/joesarkis/signmatic-asl-keypoint-dataset-50-words-and-idle
+[SignMatic ASL Keypoint Dataset: 50 Words and Idle](https://www.kaggle.com/datasets/joesarkis/signmatic-asl-keypoint-dataset-50-words-and-idle)
 
-The dataset is keypoint-based, not raw-video-based. Each sample is represented as a 30-frame sequence. Each frame contains:
+The Kaggle release contains 21,553 processed sequences:
 
-- 33 pose landmarks with `x`, `y`, `z`, and visibility values.
-- 21 left-hand landmarks with `x`, `y`, and `z` values.
-- 21 right-hand landmarks with `x`, `y`, and `z` values.
-- 258 features per frame in total.
+- 19,401 sequences extracted from custom recordings.
+- 2,152 synthetic sequences generated by augmenting custom keypoints.
+- 51 classes consisting of 50 ASL words and `Idle`.
 
-Synthetic augmentation is applied only to the custom keypoint sequences. MS-ASL samples are used as extracted keypoint sequences without synthetic augmentation.
+MS-ASL-derived samples are not included in the Kaggle release.
+
+The broader dataset used to develop the final hybrid model contained:
+
+- 19,401 custom keypoint sequences.
+- 4,192 selected MS-ASL-derived keypoint sequences.
+- 2,152 synthetic custom-keypoint sequences.
+- 25,745 sequences in total.
+
+Synthetic augmentation was applied only to custom keypoint sequences. MS-ASL-derived sequences were used without synthetic augmentation.
+
+### Feature Representation
+
+Each sample has the shape `30 x 258`:
+
+- 33 pose landmarks with `x`, `y`, `z`, and visibility values: 132 features.
+- 21 left-hand landmarks with `x`, `y`, and `z` values: 63 features.
+- 21 right-hand landmarks with `x`, `y`, and `z` values: 63 features.
+
+Missing landmark groups are zero-filled to preserve the fixed feature shape.
 
 ## Vocabulary
 
-The final classifier contains 51 classes:
+The classifier uses the following class order:
 
-- 50 ASL words: `Nice`, `Eat`, `Yes`, `No`, `Water`, `Help`, `Hello`, `Fine`, `Good`, `Please`, `Give`, `We`, `A`, `Have`, `Work`, `So`, `Hard`, `Live`, `Love`, `Thanks`, `High`, `Grade`, `Lebanese`, `International`, `University`, `Teacher`, `Happy`, `Like`, `Want`, `Deaf`, `School`, `What`, `Need`, `Friend`, `Learn`, `Book`, `Computer`, `Again`, `Father`, `Mother`, `Where`, `Forget`, `Nothing`, `I`, `You`, `And`, `My`, `Name`, `Is`, `ILoveYou`.
-- `Idle`, used when no supported sign is being accepted.
+```text
+Nice, Eat, Yes, No, Water, Help, Hello, Fine, Good, Please,
+Give, We, A, Have, Work, So, Hard, Live, Love, Thanks,
+High, Grade, Lebanese, International, University,
+Teacher, Happy, Like, Want, Deaf, School,
+What, Need, Friend, Learn, Book, Computer,
+Again, Father, Mother, Where, Forget, Nothing,
+I, You, And, My, Name, Is, ILoveYou, Idle
+```
 
-## Model Architecture
+The class order must remain unchanged when using the trained model.
+
+## Transformer Architecture
 
 The final model is implemented in `src/hybrid/train_transformer_model.py`.
 
 ```text
-Input: 30 frames x 258 features
-Dense projection: 258 -> 128
-Transformer encoder block 1:
-  Multi-head self-attention: 4 heads, key dimension 64
-  Residual connection + layer normalization
-  Feed-forward network: 128 -> 256 -> 128
-  Residual connection + layer normalization
-Transformer encoder block 2:
+Input                              30 x 258
+Frame-wise dense projection        258 -> 128
+
+Transformer encoder block 1
+  Multi-head self-attention        4 heads, key dimension 64
+  Attention dropout               0.25
+  Residual connection
+  Layer normalization
+  Feed-forward network            128 -> 256 -> 128
+  Feed-forward dropout            0.25
+  Residual connection
+  Layer normalization
+
+Transformer encoder block 2
   Same structure as block 1
-Global average pooling over the time dimension
-Dense 128 + ReLU + dropout
-Dense 64 + ReLU + dropout
-Dense 51 + softmax
+
+Global average pooling             30 x 128 -> 128
+Dense + ReLU                       128
+Dropout                            0.40
+Dense + ReLU                       64
+Dropout                            0.30
+Softmax classifier                 51 classes
 ```
 
-Final thesis evaluation reported about 98% test accuracy on the hybrid 50-word-plus-Idle dataset. In real time, the model output is filtered by the inference layer before a word is accepted.
+The model is trained with categorical cross-entropy and the Adam optimizer using a learning rate of `0.0005`. The final thesis evaluation reported approximately 98% held-out test accuracy.
+
+During real-time use, the highest model probability is not accepted immediately. A word must also satisfy the confidence threshold, prediction-stability, hand-presence, cooldown, and Idle-state checks implemented by the inference layer.
 
 ## Laptop Setup
 
-Create a virtual environment and install the Python dependencies:
+Create and activate a Python virtual environment:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\activate
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 pip install -r requirements.txt
+```
+
+## Custom Data Collection
+
+Run the custom keypoint collector:
+
+```powershell
+python src/custom/collect_custom_keypoints.py
+```
+
+Contributor recordings can be merged using:
+
+```powershell
+python src/custom/merge_external_keypoints.py
 ```
 
 ## Training Workflow
 
-The normal final training workflow is:
+The final training workflow is:
 
 ```powershell
 python src/custom/augment_custom_keypoints.py
@@ -109,21 +195,21 @@ python src/hybrid/build_hybrid_dataset.py
 python src/hybrid/train_transformer_model.py
 ```
 
-The training script expects the processed arrays under:
+The training script reads the processed arrays from:
 
 ```text
 data/Hybrid/processed_hybrid_50_augmented_v2/
 ```
 
-It writes the trained Keras model under:
+The final Keras model is written to:
 
 ```text
 models/final_signmatic_transformer_50words.h5
 ```
 
-## Evaluation and Conversion
+## Evaluation and Model Conversion
 
-Evaluate the saved Transformer model on the hybrid test split:
+Evaluate the trained Transformer:
 
 ```powershell
 python src/hybrid/evaluate_hybrid_confusion.py
@@ -135,7 +221,7 @@ Export the Keras model to ONNX:
 python src/hybrid/convert_model_to_onnx.py
 ```
 
-Check the ONNX model:
+Validate the exported ONNX model:
 
 ```powershell
 python src/hybrid/test_onnx_model.py
@@ -143,59 +229,59 @@ python src/hybrid/test_onnx_model.py
 
 ## Laptop Real-Time Inference
 
-After placing the trained Keras model at `models/final_signmatic_transformer_50words.h5`, run:
+Place the trained Keras model at:
+
+```text
+models/final_signmatic_transformer_50words.h5
+```
+
+Then run:
 
 ```powershell
 python src/hybrid/realtime_hybrid_inference.py
 ```
 
-The laptop inference script opens the webcam, extracts MediaPipe landmarks, keeps a 30-frame sequence buffer, predicts a class, and accepts the word only when the confidence, stability, hand-presence, and cooldown checks are satisfied.
+The script opens the webcam, extracts pose and hand landmarks, maintains a 30-frame sequence buffer, performs Transformer inference, and applies the real-time acceptance checks before displaying or speaking a word.
 
 ## Jetson Deployment
 
-The Jetson deployment files are in `jetson/`.
+Jetson deployment files are located in `jetson/`.
 
-- `welcome_app.py` displays the startup interface and launches the main translator.
-- `signmatic_kiosk.py` runs the PyQt5 touchscreen interface, camera pipeline, TensorRT inference, English/Arabic output logic, and offline Piper speech synthesis.
-- `requirements-jetson.txt` lists Python packages used by the Jetson application. TensorRT, CUDA, and PyCUDA should match the JetPack installation on the device.
+- `welcome_app.py` provides the startup interface and launches the translator.
+- `signmatic_kiosk.py` implements the CSI camera pipeline, MediaPipe extraction, TensorRT inference, sentence logic, bilingual interface, system controls, and Piper speech synthesis.
+- `requirements-jetson.txt` lists the Python packages used by the Jetson application.
 
-Expected local Jetson folders:
+The runtime expects the TensorRT engine under:
 
 ```text
-models/
-  final_signmatic_transformer_50words.trt
-jetson/
-  assets/
-    welcome_background.jpg
-    theme_1.jpg
-    theme_2.jpg
-    theme_5.jpg
-  voices/
-    ryan.onnx
-    hfc_female.onnx
-    kareem.onnx
+models/final_signmatic_transformer_50words.trt
 ```
 
-Voice and model binaries are not committed to Git because they are generated or downloaded assets.
+Detailed deployment instructions and the required local asset layout are provided in [`jetson/README.md`](jetson/README.md).
 
-## GitHub Notes
+## Artifact Policy
 
-Keep these files and folders out of commits:
+The following generated or device-specific artifacts are excluded from Git:
 
-- `.venv/`
-- `data/`
-- `models/`
-- `outputs/`
-- `Logs/`
-- `*.npy`, `*.npz`
-- `*.h5`, `*.keras`, `*.onnx`, `*.trt`, `*.engine`, `*.tflite`
-- Piper voice model files
-- raw videos and temporary experiment outputs
+- Virtual environments.
+- Raw and processed datasets.
+- NumPy arrays.
+- Keras, ONNX, and TensorRT model files.
+- TensorRT engine files.
+- Piper voice models and their configuration files.
+- Raw videos and generated audio.
+- Training logs and temporary experiment outputs.
 
-If large assets need to be shared, use Kaggle, GitHub Releases, or Git LFS instead of committing them directly to the repository.
+These exclusions are defined in `.gitignore`. The public keypoint dataset is distributed separately through Kaggle.
+
+## Research References
+
+- C. Lugaresi et al., [MediaPipe: A Framework for Building Perception Pipelines](https://arxiv.org/abs/1906.08172), 2019.
+- A. Vaswani et al., [Attention Is All You Need](https://arxiv.org/abs/1706.03762), 2017.
+- H. R. Vaezi Joze and O. Koller, [MS-ASL: A Large-Scale Data Set and Benchmark for Understanding American Sign Language](https://arxiv.org/abs/1812.01053), 2018.
 
 ## Authors
 
 Joe Sarkis and Ali Yaghi
 
-Master Thesis, Computer and Communications Engineering
+Master's Thesis in Computer and Communications Engineering

@@ -137,11 +137,11 @@ Frame-wise dense projection        258 -> 128
 
 Transformer encoder block 1
   Multi-head self-attention        4 heads, key dimension 64
-  Attention dropout               0.25
+  Attention dropout                0.25
   Residual connection
   Layer normalization
-  Feed-forward network            128 -> 256 -> 128
-  Feed-forward dropout            0.25
+  Feed-forward network             128 -> 256 -> 128
+  Feed-forward dropout             0.25
   Residual connection
   Layer normalization
 
